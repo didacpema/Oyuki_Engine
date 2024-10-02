@@ -12,7 +12,7 @@ using u8vec4 = glm::u8vec4;
 using ivec2 = glm::ivec2;
 using vec3 = glm::dvec3;
 
-static const ivec2 WINDOW_SIZE(600, 600);
+static const ivec2 WINDOW_SIZE(1280, 720);
 static const auto FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 
@@ -21,6 +21,12 @@ static void init_openGL() {
 	if (!GLEW_VERSION_3_0) throw exception("OpenGL 3.0 API is not available.");
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.5, 0.5, 0.5, 1.0);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glScaled(1.0, (double)WINDOW_SIZE.x/WINDOW_SIZE.y, 1.0);
+	
+	glMatrixMode(GL_MODELVIEW);
 }
 
 static void draw_triangle(const u8vec4& color, const vec3& center, double size) {
