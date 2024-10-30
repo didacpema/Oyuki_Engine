@@ -22,6 +22,11 @@ public:
 	int height() const { return _height; }
 	double aspect() const { return static_cast<double>(_width) / _height; }
 
+	float cameraDistance = 5.0f; // Distancia inicial de la cámara (zoom)
+	float cameraAngleX = 0.0f; // Ángulo de rotación en el eje X
+	float cameraAngleY = 0.0f; // Ángulo de rotación en el eje Y
+	float panX = 0.0f, panY = 0.0f; // Desplazamiento de la cámara (pan)
+
 	auto* windowPtr() const { return _window; }
 	auto* contextPtr() const { return _ctx; }
 
@@ -36,6 +41,7 @@ public:
 	bool isOpen() const { return _window; }
 
 	bool processEvents(IEventProcessor* event_processor = nullptr);
+	void draw();
 	void swapBuffers() const;
 
 };
