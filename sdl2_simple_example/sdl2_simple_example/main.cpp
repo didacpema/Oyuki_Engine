@@ -12,9 +12,16 @@
 #include <vector>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <IL/il.h>       // DevIL para la carga de imágenes
-#include <IL/ilu.h>      // Funciones adicionales de DevIL
-#include <IL/ilut.h>     // Para integración con OpenGL
+#include <IL/il.h>       // DevIL for image loading
+#include <IL/ilu.h>      // Additional DevIL functions
+#include <IL/ilut.h>     // For OpenGL integration with DevIL
+#include <string>        // For string handling
+
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
+
+#include "queue"
 
 #define CHECKERS_WIDTH 64
 #define CHECKERS_HEIGHT 64
@@ -37,19 +44,17 @@ vector<float> vertices;
 vector<float> uvs;
 vector<unsigned int> indices;
 
-float modelScale = 1.0f; // Factor de escala global para el modelo
-vec3 modelCenter(0.0f); // Centro del modelo para su ajuste en escena
+float modelScale = 1.0f; // Global scaling factor for the model
+vec3 modelCenter(0.0f); // Model center for positioning
 
 MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
 
-// Función para configurar la proyección
 void setupProjection(float fov, float aspectRatio, float nearPlane, float farPlane) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(fov, aspectRatio, nearPlane, farPlane);
 }
 
-// Función para configurar la vista de la cámara
 void setupView() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -61,7 +66,6 @@ void setupView() {
     gluLookAt(eyeX, eyeY, eyeZ, myWindow.panX, myWindow.panY, 0.0, 0.0, 1.0, 0.0);
 }
 
-// Inicialización de OpenGL
 static void init_openGL() {
     glewInit();
     if (!GLEW_VERSION_3_0) throw std::exception("OpenGL 3.0 API is not available.");
@@ -75,7 +79,6 @@ static void init_openGL() {
     setupProjection(fov, aspectRatio, nearPlane, farPlane);
 }
 
-// Generar textura checkerboard
 void generateCheckerImage() {
     for (int i = 0; i < CHECKERS_HEIGHT; i++) {
         for (int j = 0; j < CHECKERS_WIDTH; j++) {
@@ -97,11 +100,11 @@ GLuint loadTexture(const char* texturePath) {
 
     if (!ilLoadImage((const wchar_t*)texturePath)) {
         ilDeleteImages(1, &imageID);
-        fprintf(stderr, "No se pudo cargar la textura desde: %s\n", texturePath);
-        return 0; // Retorna 0 si falla la carga
+        fprintf(stderr, "Failed to load texture from: %s\n", texturePath);
+        return 0;
     }
 
-    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE); // Convertir la imagen a formato RGBA
+    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -112,17 +115,16 @@ GLuint loadTexture(const char* texturePath) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH),
         ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
 
-    ilDeleteImages(1, &imageID); // Liberar la imagen en DevIL
+    ilDeleteImages(1, &imageID);
     return textureID;
 }
 
-// Configurar la textura en OpenGL
 void drawTextures(const char* texturePath) {
-    textureID = loadTexture(texturePath); // Cargar textura desde la ruta dada
+    textureID = loadTexture(texturePath);
 
     if (textureID == 0) {
-        fprintf(stderr, "Fallo en la carga de la textura. Se usará una textura checkerboard predeterminada.\n");
-        generateCheckerImage();  // Genera checkerboard si la carga falla
+        fprintf(stderr, "Texture loading failed. Using default checkerboard texture.\n");
+        generateCheckerImage();
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glGenTextures(1, &textureID);
@@ -136,12 +138,10 @@ void drawTextures(const char* texturePath) {
     }
 }
 
-// Ajusta el centro del modelo en el origen
 void centerModel(const aiScene* scene) {
     aiVector3D min, max;
     min = max = scene->mMeshes[0]->mVertices[0];
 
-    // Encuentra los límites del modelo
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         for (unsigned int v = 0; v < scene->mMeshes[i]->mNumVertices; v++) {
             aiVector3D vertex = scene->mMeshes[i]->mVertices[v];
@@ -154,40 +154,39 @@ void centerModel(const aiScene* scene) {
         }
     }
     modelCenter = vec3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
-    modelScale = 2.0f / length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
+    modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
 }
 
-// Modifica drawFBX para centrar y escalar el modelo
-int drawFBX() {
-    const char* file = "C:/Users/didacpm/Downloads/trump.fbx";
-    const aiScene* scene = aiImportFile(file, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords);
+bool loadFBX(const char* filePath) {
+    const struct aiScene* scene = aiImportFile(filePath, aiProcess_Triangulate | aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
 
     if (!scene) {
-        fprintf(stderr, "Error al cargar el archivo: %s\n", aiGetErrorString());
-        return -1;
+        fprintf(stderr, "Error loading file: %s\n", aiGetErrorString());
+        return false;
     }
 
-    centerModel(scene); // Centrar el modelo
+    printf("FBX Loaded with %d meshes\n", scene->mNumMeshes);
+    centerModel(scene);
 
     vertices.clear();
     uvs.clear();
     indices.clear();
 
-    // Procesar mallas del modelo
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
+        printf("Mesh %d has %d vertices\n", i, mesh->mNumVertices);
 
-        // Procesar vértices y coordenadas UV
+        // Collect vertices and uvs
         for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
             aiVector3D vertex = mesh->mVertices[v];
-            vertices.push_back((vertex.x - modelCenter.x) * modelScale);
-            vertices.push_back((vertex.y - modelCenter.y) * modelScale);
-            vertices.push_back((vertex.z - modelCenter.z) * modelScale);
+            vertices.push_back(vertex.x);
+            vertices.push_back(vertex.y);
+            vertices.push_back(vertex.z);
 
             if (mesh->HasTextureCoords(0)) {
-                aiVector3D uv = mesh->mTextureCoords[0][v];
-                uvs.push_back(uv.x);
-                uvs.push_back(1.0f-uv.y);
+                aiVector3D texCoord = mesh->mTextureCoords[0][v];
+                uvs.push_back(texCoord.x);
+                uvs.push_back(1.0f - texCoord.y);
             }
             else {
                 uvs.push_back(0.0f);
@@ -195,28 +194,27 @@ int drawFBX() {
             }
         }
 
-        // Procesar índices de caras
+        // Collect indices
         for (unsigned int f = 0; f < mesh->mNumFaces; f++) {
             aiFace face = mesh->mFaces[f];
-            if (face.mNumIndices == 3) {
-                indices.push_back(face.mIndices[0]);
-                indices.push_back(face.mIndices[1]);
-                indices.push_back(face.mIndices[2]);
+            for (unsigned int j = 0; j < face.mNumIndices; j++) {
+                indices.push_back(face.mIndices[j]);
             }
         }
     }
 
     aiReleaseImport(scene);
-    return 0;
+    printf("Model loading complete. Vertex count: %lu, UV count: %lu, Index count: %lu\n", vertices.size(), uvs.size(), indices.size());
+    return true;
 }
 
-// Modificar display_func para usar la escala y posicionamiento
-static void display_func() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    setupView();
-
+void drawFBX() {
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textureID);  // Asegurarse de que textureID esté enlazado
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glPushMatrix();
+    glTranslatef(-modelCenter.x, -modelCenter.y, -modelCenter.z);
+    glScalef(modelScale, modelScale, modelScale);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -226,27 +224,78 @@ static void display_func() {
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    glPopMatrix();
     glDisable(GL_TEXTURE_2D);
+}
+
+void display_func() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    setupView();
+    drawFBX();
+    glFlush();
+}
+
+// Function to handle dropped files and determine their type
+void handleFileDrop(const char* filePath) {
+    std::string path(filePath);
+
+    // Check for file extension to determine if it's an FBX model or texture
+    if (path.substr(path.find_last_of(".") + 1) == "fbx") {
+        if (!loadFBX(filePath)) {
+            fprintf(stderr, "Failed to load FBX model.\n");
+        }
+    }
+    else if (path.substr(path.find_last_of(".") + 1) == "png" || path.substr(path.find_last_of(".") + 1) == "jpg") {
+        GLuint newTexture = loadTexture(filePath);
+        if (newTexture != 0) {
+            glDeleteTextures(1, &textureID);  // Delete the previous texture if any
+            textureID = newTexture;           // Set the new texture
+        }
+        else {
+            fprintf(stderr, "Failed to load texture.\n");
+        }
+    }
 }
 
 int main(int argc, char** argv) {
     ilInit();
     iluInit();
-    ilutRenderer(ILUT_OPENGL); // Configura DevIL para OpenGL
+    ilutRenderer(ILUT_OPENGL);
     init_openGL();
 
-    drawTextures("C:/Users/didacpm/Downloads/trumpTex.png");  // Cargar y configurar textura desde ruta
-
-    if (drawFBX() == -1) {
-        fprintf(stderr, "No se pudo cargar el modelo FBX\n");
-        return -1;
+    if (argc > 1) {
+        // Load initial model and texture if specified
+        handleFileDrop(argv[1]);
     }
 
+    //loadFBX("C:/Users/User/Desktop/BakerHouse.fbx");
+    //drawTextures("C:/Users/User/Desktop/Baker_house.png");
+
+    SDL_Event event;
     while (myWindow.processEvents() && myWindow.isOpen()) {
         const auto t0 = hrclock::now();
-        display_func();
+
+        queue<string> droppedFiles;
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_DROPFILE) {
+                char* droppedFile = event.drop.file;
+                droppedFiles.push(std::string(droppedFile)); // Push to queue
+                SDL_free(droppedFile);
+            }
+        }
+
+        // Process all dropped files
+        while (!droppedFiles.empty()) {
+            handleFileDrop(droppedFiles.front().c_str());
+            droppedFiles.pop();
+        }
+
+        display_func(); // Render your scene
         myWindow.draw();
-        myWindow.swapBuffers();
+        myWindow.swapBuffers(); // Swap buffers to display
+
         const auto t1 = hrclock::now();
         const auto dt = t1 - t0;
         if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
