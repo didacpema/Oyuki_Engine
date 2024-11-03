@@ -45,3 +45,6 @@ public:
 	void swapBuffers() const;
 
 };
+
+
+extern void handleFileDrop(const char* filePath);

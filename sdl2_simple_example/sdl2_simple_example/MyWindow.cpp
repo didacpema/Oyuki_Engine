@@ -17,6 +17,8 @@ MyWindow::MyWindow(const char* title, unsigned short width, unsigned short heigh
     ImGui::CreateContext();
     ImGui_ImplSDL2_InitForOpenGL(_window, _ctx);
     ImGui_ImplOpenGL3_Init("#version 130");
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
 MyWindow::~MyWindow() {
@@ -78,35 +80,43 @@ void MyWindow::swapBuffers() const {
     SDL_GL_SwapWindow(static_cast<SDL_Window*>(_window));
 }
 
+
 bool MyWindow::processEvents(IEventProcessor* event_processor) {
     SDL_Event e;
     static int lastMouseX, lastMouseY;
 
     while (SDL_PollEvent(&e)) {
         if (event_processor) event_processor->processEvent(e);
+
+        // Procesa el evento de archivo arrastrado y soltado
+        if (e.type == SDL_DROPFILE) {
+            char* droppedFile = e.drop.file;
+            // Procesa el archivo aquí llamando a una función de carga o algo similar
+            handleFileDrop(droppedFile); // Tu función para manejar archivos
+            SDL_free(droppedFile); // Libera la memoria
+            continue; // Pasa al siguiente evento para evitar que ImGui también lo maneje
+        }
+
         switch (e.type) {
         case SDL_QUIT:
             close();
             return false;
         case SDL_MOUSEMOTION:
             if (e.motion.state & SDL_BUTTON_RMASK) {
-                // Mantener ALT para hacer pan
                 if (SDL_GetModState() & KMOD_ALT) {
                     panX -= e.motion.xrel * 0.01f;
                     panY += e.motion.yrel * 0.01f;
                 }
                 else {
-                    // Rotación si solo se mantiene clic derecho
                     cameraAngleY += e.motion.xrel * 0.005f;
                     cameraAngleX += e.motion.yrel * 0.005f;
                 }
             }
             break;
         case SDL_MOUSEWHEEL:
-            // Zoom con la rueda del ratón
-            if (e.wheel.y > 0) cameraDistance -= 0.5f;   // Acercar
-            if (e.wheel.y < 0) cameraDistance += 0.5f;   // Alejar
-            cameraDistance = max(1.0f, cameraDistance); // Limitar el zoom mínimo
+            if (e.wheel.y > 0) cameraDistance -= 0.5f;
+            if (e.wheel.y < 0) cameraDistance += 0.5f;
+            cameraDistance = max(1.0f, cameraDistance);
             break;
         default:
             ImGui_ImplSDL2_ProcessEvent(&e);

@@ -154,7 +154,7 @@ void centerModel(const aiScene* scene) {
         }
     }
     modelCenter = vec3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
-    modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
+    //modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
 }
 
 bool loadFBX(const char* filePath) {
@@ -239,67 +239,48 @@ void display_func() {
 // Function to handle dropped files and determine their type
 void handleFileDrop(const char* filePath) {
     std::string path(filePath);
+    std::string extension = path.substr(path.find_last_of('.') + 1);
 
-    // Check for file extension to determine if it's an FBX model or texture
-    if (path.substr(path.find_last_of(".") + 1) == "fbx") {
+    if (extension == "fbx") {
         if (!loadFBX(filePath)) {
             fprintf(stderr, "Failed to load FBX model.\n");
         }
     }
-    else if (path.substr(path.find_last_of(".") + 1) == "png" || path.substr(path.find_last_of(".") + 1) == "jpg") {
+    else if (extension == "png" || extension == "jpg" || extension == "jpeg") {
         GLuint newTexture = loadTexture(filePath);
         if (newTexture != 0) {
-            glDeleteTextures(1, &textureID);  // Delete the previous texture if any
-            textureID = newTexture;           // Set the new texture
+            glDeleteTextures(1, &textureID);
+            textureID = newTexture;
         }
         else {
             fprintf(stderr, "Failed to load texture.\n");
         }
     }
+    else {
+        fprintf(stderr, "Unsupported file type: %s\n", filePath);
+    }
 }
 
 int main(int argc, char** argv) {
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     ilInit();
     iluInit();
     ilutRenderer(ILUT_OPENGL);
     init_openGL();
 
-    if (argc > 1) {
-        // Load initial model and texture if specified
-        handleFileDrop(argv[1]);
-    }
-
     //loadFBX("C:/Users/User/Desktop/BakerHouse.fbx");
     //drawTextures("C:/Users/User/Desktop/Baker_house.png");
 
-    SDL_Event event;
     while (myWindow.processEvents() && myWindow.isOpen()) {
         const auto t0 = hrclock::now();
-
-        queue<string> droppedFiles;
-
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_DROPFILE) {
-                char* droppedFile = event.drop.file;
-                droppedFiles.push(std::string(droppedFile)); // Push to queue
-                SDL_free(droppedFile);
-            }
-        }
-
-        // Process all dropped files
-        while (!droppedFiles.empty()) {
-            handleFileDrop(droppedFiles.front().c_str());
-            droppedFiles.pop();
-        }
-
-        display_func(); // Render your scene
+        display_func();
         myWindow.draw();
         myWindow.swapBuffers(); // Swap buffers to display
-
+        //gui.render();
         const auto t1 = hrclock::now();
         const auto dt = t1 - t0;
         if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
     }
-
     return 0;
 }
