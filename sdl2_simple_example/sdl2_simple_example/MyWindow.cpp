@@ -80,7 +80,6 @@ void MyWindow::swapBuffers() const {
     SDL_GL_SwapWindow(static_cast<SDL_Window*>(_window));
 }
 
-
 bool MyWindow::processEvents(IEventProcessor* event_processor) {
     SDL_Event e;
     static int lastMouseX, lastMouseY;
