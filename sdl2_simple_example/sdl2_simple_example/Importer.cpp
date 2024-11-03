@@ -85,6 +85,8 @@ bool Importer::loadFBX(const std::string& filePath) {
             }
         }
     }
+    std::cerr << "FBX loaded"<< std::endl;
+
     return true;
 }
 
@@ -109,5 +111,7 @@ GLuint Importer::loadTexture(const std::string& texturePath) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     ilDeleteImages(1, &imageID);
+
+    std::cerr << "Texture loaded" << std::endl;
     return textureID;
 } 

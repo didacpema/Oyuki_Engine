@@ -1,16 +1,21 @@
 #pragma once
-#include <string>
-#include <vector>
+#include "Mesh.h"
+#include "Texture.h"
+#include "Transform.h"
 
 class GameObject {
 public:
-    std::string name;
-    std::vector<GameObject*> children;
+    GameObject(Mesh* mesh, Texture* texture);
+    ~GameObject();
 
-    GameObject(const std::string& name) : name(name) {}
-    ~GameObject() {
-        for (auto* child : children) delete child;
-    }
+    void draw() const;
+    void setTexture(Texture* texture);
 
-    void addChild(GameObject* child) { children.push_back(child); }
+    // Method to set the transform from outside
+    void setTransform(const Transform& newTransform);
+
+private:
+    Mesh* mesh;
+    Texture* texture;
+    Transform transform;
 };
