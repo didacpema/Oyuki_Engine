@@ -200,15 +200,36 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         case SDL_MOUSEMOTION:
             if (e.motion.state & SDL_BUTTON_RMASK) {
                 if (SDL_GetModState() & KMOD_ALT) {
-                    panX -= e.motion.xrel * 0.01f;
-                    panY += e.motion.yrel * 0.01f;
-                }
-                else {
                     cameraAngleY += e.motion.xrel * 0.005f;
-                    cameraAngleX += e.motion.yrel * 0.005f;
+                    cameraAngleX -= e.motion.yrel * 0.005f;
                 }
+               
             }
             break;
+		case SDL_KEYDOWN:
+			if(e.key.keysym.sym == SDLK_w) {
+                if (SDL_KEYDOWN) {
+                    panY += 0.1f;
+                    
+                }
+			}
+			if (e.key.keysym.sym == SDLK_s) {
+				if (SDL_KEYDOWN) {
+					panY -= 0.1f;
+				}
+			}
+			if (e.key.keysym.sym == SDLK_a) {
+				if (SDL_KEYDOWN) {
+					panX-= 0.1f;
+				}
+			}
+			if (e.key.keysym.sym == SDLK_d) {
+				if (SDL_KEYDOWN) {
+					panX += 0.1f;
+				}
+			}
+			
+			break;
         case SDL_MOUSEWHEEL:
             cameraDistance += e.wheel.y > 0 ? -0.5f : 0.5f;
             cameraDistance = max(1.0f, cameraDistance);
