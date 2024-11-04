@@ -7,6 +7,7 @@
 #include <IL/ilut.h>
 #include <iostream>
 #include <fstream>
+#include "MyWindow.h"
 
 using vec3 = glm::dvec3;
 
@@ -23,6 +24,10 @@ Importer::~Importer() {
     if (textureID) {
         glDeleteTextures(1, &textureID);
     }
+}
+
+void Importer::setWindow(MyWindow* window) {
+    _window = window;
 }
 
 void centerModel(const aiScene* scene) {
@@ -74,25 +79,36 @@ GLuint Importer::createCheckerTexture() {
     return checkerTexture;
 }
 
-// Modifica el método `loadFBX` para asignar la textura checker si el modelo no tiene una propia
 bool Importer::loadFBX(const std::string& filePath) {
+    _window->logMessage("Attempting to load FBX file: " + filePath);  // New log message
+
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
 
     if (!scene) {
-        std::cerr << "Error loading FBX: " << importer.GetErrorString() << std::endl;
+        _window->logMessage("Error loading FBX: " + std::string(importer.GetErrorString()));
         return false;
     }
 
+    _window->logMessage("Successfully loaded FBX file: " + filePath);
+
+    // Centering the model and logging its details
     centerModel(scene);
+    _window->logMessage("Model centered with scale factor: " + std::to_string(modelScale) + ", center: (" +
+        std::to_string(modelCenter.x) + ", " +
+        std::to_string(modelCenter.y) + ", " +
+        std::to_string(modelCenter.z) + ")");
 
     vertices.clear();
     uvs.clear();
     indices.clear();
 
-    // Procesar vértices y UVs como antes
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
+        _window->logMessage("Processing mesh: " + std::to_string(i) + " with " +
+            std::to_string(mesh->mNumVertices) + " vertices and " +
+            std::to_string(mesh->mNumFaces) + " faces.");
+
         for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
             aiVector3D vertex = mesh->mVertices[v];
             vertices.push_back(vertex.x);
@@ -117,14 +133,15 @@ bool Importer::loadFBX(const std::string& filePath) {
         }
     }
 
-    // Si el modelo no tiene textura, asigna la textura checker
     if (scene->mNumMaterials == 0) {
         textureID = createCheckerTexture();
+        _window->logMessage("No texture found in model. Checker texture applied.");
+    }
+    else {
+        _window->logMessage("Texture detected and applied.");
     }
 
-    std::cerr << "FBX loaded" << std::endl;
     return true;
-
 }
 
 GLuint Importer::loadTexture(const std::string& texturePath) {

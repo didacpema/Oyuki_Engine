@@ -4,6 +4,7 @@
 #include <string>
 #include <GL/glew.h>
 #include "glm/glm.hpp"
+#include "MyWindow.h"
 
 class Importer {
 public:
@@ -21,9 +22,13 @@ public:
     GLuint createCheckerTexture();
     GLuint getTextureID() const;
 
+    void setWindow(MyWindow* window);
+
 private:
     std::vector<float> vertices;
     std::vector<float> uvs;
     std::vector<unsigned int> indices;
     GLuint textureID = 0;
+
+    MyWindow* _window = nullptr;
 };

@@ -26,7 +26,6 @@ using hrclock = chrono::high_resolution_clock;
 static const unsigned int FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 
-MyWindow myWindow("SDL2 Simple Example", 1024, 720);
 Importer importer;
 Scene scene;
 
@@ -38,10 +37,10 @@ void handleFileDrop(const char* filePath) {
         if (importer.loadFBX(filePath)) {
             scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices());
 
-            // Asigna la textura checker si no hay ninguna
+            // Asigna la textura checker usando el nuevo método
             if (importer.getTextureID() == 0) {
                 GLuint checkerTexture = importer.createCheckerTexture();
-                scene.setTexture(checkerTexture);
+                scene.setCheckerTexture(checkerTexture);
             }
             else {
                 scene.setTexture(importer.getTextureID());
@@ -57,14 +56,28 @@ void handleFileDrop(const char* filePath) {
 }
 
 int main(int argc, char** argv) {
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    MyWindow myWindow("SDL2 Simple Example", 1024, 720);
+    importer.setWindow(&myWindow);
+
+    myWindow.logMessage("Initializing SDL...");
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        myWindow.logMessage("Error initializing SDL: " + std::string(SDL_GetError()));
+        return -1;
+    }
+    myWindow.logMessage("SDL initialized successfully.");
+
+    myWindow.logMessage("Initializing DevIL...");
     ilInit();
     iluInit();
     ilutRenderer(ILUT_OPENGL);
+    myWindow.logMessage("DevIL initialized successfully.");
 
+    myWindow.logMessage("Initializing OpenGL context...");
     Renderer::initOpenGL();
     Renderer::setupProjection(45.0f, 1.0f, 0.1f, 100.0f);
+    myWindow.logMessage("OpenGL context initialized.");
+
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
@@ -72,7 +85,7 @@ int main(int argc, char** argv) {
         Renderer::setupView(myWindow.cameraDistance, myWindow.cameraAngleX, myWindow.cameraAngleY, myWindow.panX, myWindow.panY);
         scene.drawScene();
 
-        myWindow.draw();  // Llama a la función de dibujo de ImGui
+        myWindow.draw();
         myWindow.swapBuffers();
 
         auto elapsed = hrclock::now() - start;
@@ -80,5 +93,6 @@ int main(int argc, char** argv) {
     }
 
     SDL_Quit();
+    myWindow.logMessage("Application terminated.");
     return 0;
 }

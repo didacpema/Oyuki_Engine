@@ -30,6 +30,10 @@ MyWindow::~MyWindow() {
     close();
 }
 
+void MyWindow::logMessage(const std::string& message) {
+    logMessages.push_back(message);
+}
+
 void MyWindow::open(const char* title, unsigned short width, unsigned short height) {
     if (isOpen()) return;
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -37,13 +41,18 @@ void MyWindow::open(const char* title, unsigned short width, unsigned short heig
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    _window = SDL_CreateWindow( title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-    if (!_window) throw exception(SDL_GetError());
+    _window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+    if (!_window) {
+        logMessage("Error al crear ventana SDL."); // Mensaje en caso de error
+        throw exception(SDL_GetError());
+    }
 
     _ctx = SDL_GL_CreateContext(_window);
-    if (!_ctx) throw exception(SDL_GetError());
-    if (SDL_GL_MakeCurrent(_window, _ctx) != 0) throw exception(SDL_GetError());
-    if (SDL_GL_SetSwapInterval(1) != 0) throw exception(SDL_GetError());
+    if (!_ctx) {
+        logMessage("Error al crear contexto OpenGL."); // Mensaje en caso de error
+        throw exception(SDL_GetError());
+    }
+    logMessage("Ventana y contexto creados con exito.");
 }
 
 void MyWindow::close() {
@@ -54,6 +63,8 @@ void MyWindow::close() {
 
     SDL_DestroyWindow(static_cast<SDL_Window*>(_window));
 	_window = nullptr;
+
+    logMessage("Ventana cerrada.");
 }
 
 void MyWindow::draw() {
@@ -63,8 +74,8 @@ void MyWindow::draw() {
 
     // Barra de menú principal
     if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("Menú")) {
-            if (ImGui::MenuItem("Sortir")) {
+        if (ImGui::BeginMenu("Menu")) {
+            if (ImGui::MenuItem("Salir")) {
                 SDL_Event quit_event;
                 quit_event.type = SDL_QUIT;
                 SDL_PushEvent(&quit_event);
@@ -79,10 +90,10 @@ void MyWindow::draw() {
         }
 
         if (ImGui::BeginMenu("Editor")) {
-            ImGui::MenuItem("Mostrar Consola", NULL, true);
-            ImGui::MenuItem("Mostrar Configuració", NULL, true);
-            ImGui::MenuItem("Mostrar Jerarquia", NULL, true);
-            ImGui::MenuItem("Mostrar Inspector", NULL, true);
+            ImGui::MenuItem("Consola", NULL, true);
+            ImGui::MenuItem("Config", NULL, true);
+            ImGui::MenuItem("Jerarquia", NULL, true);
+            ImGui::MenuItem("Inspector", NULL, true);
             ImGui::EndMenu();
         }
 
@@ -98,11 +109,13 @@ void MyWindow::draw() {
 
     // Consola (vacía, sin contenido de LOG aún)
     ImGui::Begin("Consola");
-    ImGui::Text("Consola: Aquí se mostrará el LOG de carga de geometrías y bibliotecas");
+    for (const auto& msg : logMessages) {
+        ImGui::Text("%s", msg.c_str());
+    }
     ImGui::End();
 
     // Configuración (vacía)
-    ImGui::Begin("Configuració");
+    ImGui::Begin("Config");
     ImGui::Text("Configuració general del sistema");
 
     // Placeholder para gráfico de FPS
@@ -169,6 +182,7 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         // Procesa el evento de archivo arrastrado y soltado
         if (e.type == SDL_DROPFILE) {
             char* droppedFile = e.drop.file;
+            logMessage("Archivo arrastrado: " + string(droppedFile));
             handleFileDrop(droppedFile); // Tu función para manejar archivos
             SDL_free(droppedFile);
             continue;
@@ -180,6 +194,7 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
 
         switch (e.type) {
         case SDL_QUIT:
+            logMessage("Evento de salida recibido.");
             close();
             return false;
         case SDL_MOUSEMOTION:

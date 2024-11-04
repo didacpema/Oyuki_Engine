@@ -8,6 +8,7 @@ public:
     ~Scene();
     void loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const Transform& transform = Transform());
     void setTexture(GLuint textureID);
+    void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
 
 private:

@@ -23,13 +23,16 @@ void Scene::setTexture(GLuint textureID) {
     if (!gameObjects.empty()) {
         Texture* newTexture = new Texture(textureID);
 
-        // Reemplazar la textura si ya existe una en el último objeto
         GameObject* lastObject = gameObjects.back();
         if (lastObject->getTexture() != nullptr) {
             delete lastObject->getTexture();
         }
         lastObject->setTexture(newTexture);
     }
+}
+
+void Scene::setCheckerTexture(GLuint checkerTextureID) {
+    setTexture(checkerTextureID);
 }
 
 void Scene::drawScene() {
