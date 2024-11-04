@@ -26,7 +26,7 @@ using hrclock = chrono::high_resolution_clock;
 static const unsigned int FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 
-MyWindow myWindow("SDL2 Simple Example", 512, 512);
+MyWindow myWindow("SDL2 Simple Example", 1024, 720);
 Importer importer;
 Scene scene;
 
@@ -68,11 +68,11 @@ int main(int argc, char** argv) {
 
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
-        if (!myWindow.processEvents()) break;
 
         Renderer::setupView(myWindow.cameraDistance, myWindow.cameraAngleX, myWindow.cameraAngleY, myWindow.panX, myWindow.panY);
         scene.drawScene();
-        myWindow.draw();
+
+        myWindow.draw();  // Llama a la función de dibujo de ImGui
         myWindow.swapBuffers();
 
         auto elapsed = hrclock::now() - start;

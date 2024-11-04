@@ -12,12 +12,14 @@
 
 using namespace std;
 
-MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height){
-	open(title, width, height);
+MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) {
+    SDL_Init(SDL_INIT_VIDEO);  // Mueve esta línea al principio del constructor
+    open(title, width, height);
+
     ImGui::CreateContext();
     ImGui_ImplSDL2_InitForOpenGL(_window, _ctx);
     ImGui_ImplOpenGL3_Init("#version 130");
-    SDL_Init(SDL_INIT_VIDEO);
+
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
@@ -59,21 +61,97 @@ void MyWindow::draw() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
+    // Barra de menú principal
     if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("Menu")) {
-            if (ImGui::MenuItem("Adeu")) {
+        if (ImGui::BeginMenu("Menú")) {
+            if (ImGui::MenuItem("Sortir")) {
                 SDL_Event quit_event;
                 quit_event.type = SDL_QUIT;
                 SDL_PushEvent(&quit_event);
             }
+            if (ImGui::MenuItem("GitHub")) {
+                // Aquí podríamos abrir el enlace de GitHub
+            }
+            if (ImGui::MenuItem("Sobre el motor")) {
+                ImGui::OpenPopup("AboutPopup");
+            }
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Editor")) {
+            ImGui::MenuItem("Mostrar Consola", NULL, true);
+            ImGui::MenuItem("Mostrar Configuració", NULL, true);
+            ImGui::MenuItem("Mostrar Jerarquia", NULL, true);
+            ImGui::MenuItem("Mostrar Inspector", NULL, true);
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Formes bàsiques")) {
+            if (ImGui::MenuItem("Cargar Forma Bàsica")) {
+                // Aquí se manejará la carga de formas
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
+    }
+
+    // Consola (vacía, sin contenido de LOG aún)
+    ImGui::Begin("Consola");
+    ImGui::Text("Consola: Aquí se mostrará el LOG de carga de geometrías y bibliotecas");
+    ImGui::End();
+
+    // Configuración (vacía)
+    ImGui::Begin("Configuració");
+    ImGui::Text("Configuració general del sistema");
+
+    // Placeholder para gráfico de FPS
+    ImGui::Text("Gràfic FPS (Placeholder)");
+    static float values[90] = {};
+    static int values_offset = 0;
+    values[values_offset] = 60.0f; // Ejemplo fijo de FPS
+    values_offset = (values_offset + 1) % 90;
+    ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, "FPS", 0.0f, 100.0f, ImVec2(0, 80));
+
+    // Opciones de configuración de módulos (placeholder)
+    ImGui::Text("Configuració de cada mòdul:");
+    ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
+
+    // Placeholder para consumo de memoria y detección de hardware
+    ImGui::Text("Consum de Memòria: ");
+    ImGui::Text("Detecció de maquinari i versions de programari:");
+    ImGui::Text("SDL, OpenGL, DevIL");
+    ImGui::End();
+
+    // Jerarquía (vacía)
+    ImGui::Begin("Jerarquia");
+    ImGui::Text("Llista de GameObjects:");
+    ImGui::Text("Aquí se mostrará la jerarquía de GameObjects");
+    ImGui::End();
+
+    // Inspector (vacío)
+    ImGui::Begin("Inspector");
+    ImGui::Text("Informació del GameObject seleccionat");
+    ImGui::Text("Component: Transform");
+    ImGui::Text("Posició: (0,0,0)");
+    ImGui::Text("Rotació: (0,0,0)");
+    ImGui::Text("Escala: (1,1,1)");
+    ImGui::Text("Component: Mesh");
+    ImGui::Text("Informació de la malla carregada");
+    ImGui::Text("Component: Texture");
+    ImGui::Text("Mida de la textura i camí");
+    ImGui::End();
+
+    // Popup "About"
+    if (ImGui::BeginPopup("AboutPopup")) {
+        ImGui::Text("Informació sobre el motor:");
+        ImGui::Text("Versió: 1.0");
+        ImGui::Text("Desenvolupat amb SDL, OpenGL, ImGui, Assimp, DevIL");
+        ImGui::EndPopup();
     }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
 }
 
 void MyWindow::swapBuffers() const {
@@ -85,15 +163,19 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
     static int lastMouseX, lastMouseY;
 
     while (SDL_PollEvent(&e)) {
-        if (event_processor) event_processor->processEvent(e);
+        // Enviar el evento a ImGui primero
+        ImGui_ImplSDL2_ProcessEvent(&e);
 
         // Procesa el evento de archivo arrastrado y soltado
         if (e.type == SDL_DROPFILE) {
             char* droppedFile = e.drop.file;
-            // Procesa el archivo aquí llamando a una función de carga o algo similar
             handleFileDrop(droppedFile); // Tu función para manejar archivos
-            SDL_free(droppedFile); // Libera la memoria
-            continue; // Pasa al siguiente evento para evitar que ImGui también lo maneje
+            SDL_free(droppedFile);
+            continue;
+        }
+
+        if (event_processor) {
+            event_processor->processEvent(e);  // Procesar eventos personalizados
         }
 
         switch (e.type) {
@@ -113,12 +195,9 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
             }
             break;
         case SDL_MOUSEWHEEL:
-            if (e.wheel.y > 0) cameraDistance -= 0.5f;
-            if (e.wheel.y < 0) cameraDistance += 0.5f;
+            cameraDistance += e.wheel.y > 0 ? -0.5f : 0.5f;
             cameraDistance = max(1.0f, cameraDistance);
             break;
-        default:
-            ImGui_ImplSDL2_ProcessEvent(&e);
         }
     }
     return true;
