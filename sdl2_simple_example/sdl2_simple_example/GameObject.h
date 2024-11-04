@@ -11,7 +11,10 @@ public:
     void draw() const;
     void setTexture(Texture* texture);
 
-    // Method to set the transform from outside
+    // Método para obtener la textura actual
+    Texture* getTexture() const;
+
+    // Método para establecer la transformación desde fuera de la clase
     void setTransform(const Transform& newTransform);
 
 private:

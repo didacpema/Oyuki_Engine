@@ -21,8 +21,14 @@ void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<
 
 void Scene::setTexture(GLuint textureID) {
     if (!gameObjects.empty()) {
-        Texture* texture = new Texture(textureID);
-        gameObjects.back()->setTexture(texture);
+        Texture* newTexture = new Texture(textureID);
+
+        // Reemplazar la textura si ya existe una en el último objeto
+        GameObject* lastObject = gameObjects.back();
+        if (lastObject->getTexture() != nullptr) {
+            delete lastObject->getTexture();
+        }
+        lastObject->setTexture(newTexture);
     }
 }
 
@@ -30,12 +36,10 @@ void Scene::drawScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& obj : gameObjects) {
-        // Apply transformations for each object independently
-        glPushMatrix();  // Save the current matrix
+        glPushMatrix();  // Guardar la matriz actual
 
-        // Apply the object's own transformations
-        obj->draw();
+        obj->draw();  // Dibujar el objeto
 
-        glPopMatrix();   // Restore the previous matrix
+        glPopMatrix();   // Restaurar la matriz previa
     }
 }

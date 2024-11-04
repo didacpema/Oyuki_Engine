@@ -37,11 +37,22 @@ void handleFileDrop(const char* filePath) {
     if (extension == "fbx") {
         if (importer.loadFBX(filePath)) {
             scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices());
+
+            // Asigna la textura checker si no hay ninguna
+            if (importer.getTextureID() == 0) {
+                GLuint checkerTexture = importer.createCheckerTexture();
+                scene.setTexture(checkerTexture);
+            }
+            else {
+                scene.setTexture(importer.getTextureID());
+            }
         }
     }
     else if (extension == "png" || extension == "jpg") {
         GLuint texture = importer.loadTexture(filePath);
-        scene.setTexture(texture);
+        if (texture != 0) {
+            scene.setTexture(texture);
+        }
     }
 }
 

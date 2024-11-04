@@ -14,6 +14,10 @@ void GameObject::setTexture(Texture* newTexture) {
     texture = newTexture;
 }
 
+Texture* GameObject::getTexture() const {
+    return texture;
+}
+
 void GameObject::setTransform(const Transform& newTransform) {
     transform = newTransform;
 }

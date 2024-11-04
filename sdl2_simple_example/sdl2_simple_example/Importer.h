@@ -18,6 +18,8 @@ public:
     const std::vector<unsigned int>& getIndices() const { return indices; }
     GLuint getTextureID() { return textureID; }
 
+    GLuint createCheckerTexture();
+    GLuint getTextureID() const;
 
 private:
     std::vector<float> vertices;

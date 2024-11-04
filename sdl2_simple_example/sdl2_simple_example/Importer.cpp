@@ -45,6 +45,36 @@ void centerModel(const aiScene* scene) {
     //modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
 }
 
+// Dentro de la clase Importer, agrega un método para crear una textura checker
+GLuint Importer::createCheckerTexture() {
+    const int width = 64;
+    const int height = 64;
+    std::vector<GLubyte> checkerImage(width * height * 4);
+
+    // Generar el patrón checker
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            int c = ((x / 8) % 2) == ((y / 8) % 2) ? 255 : 0;
+            checkerImage[(y * width + x) * 4 + 0] = (GLubyte)c;
+            checkerImage[(y * width + x) * 4 + 1] = (GLubyte)c;
+            checkerImage[(y * width + x) * 4 + 2] = (GLubyte)c;
+            checkerImage[(y * width + x) * 4 + 3] = 255;  // Alpha
+        }
+    }
+
+    GLuint checkerTexture;
+    glGenTextures(1, &checkerTexture);
+    glBindTexture(GL_TEXTURE_2D, checkerTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerImage.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    return checkerTexture;
+}
+
+// Modifica el método `loadFBX` para asignar la textura checker si el modelo no tiene una propia
 bool Importer::loadFBX(const std::string& filePath) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
@@ -60,6 +90,7 @@ bool Importer::loadFBX(const std::string& filePath) {
     uvs.clear();
     indices.clear();
 
+    // Procesar vértices y UVs como antes
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
         for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
@@ -85,9 +116,15 @@ bool Importer::loadFBX(const std::string& filePath) {
             }
         }
     }
-    std::cerr << "FBX loaded"<< std::endl;
 
+    // Si el modelo no tiene textura, asigna la textura checker
+    if (scene->mNumMaterials == 0) {
+        textureID = createCheckerTexture();
+    }
+
+    std::cerr << "FBX loaded" << std::endl;
     return true;
+
 }
 
 GLuint Importer::loadTexture(const std::string& texturePath) {
@@ -114,4 +151,9 @@ GLuint Importer::loadTexture(const std::string& texturePath) {
 
     std::cerr << "Texture loaded" << std::endl;
     return textureID;
-} 
+}
+
+// Método para obtener la textura cargada o checker
+GLuint Importer::getTextureID() const {
+    return textureID;
+}
