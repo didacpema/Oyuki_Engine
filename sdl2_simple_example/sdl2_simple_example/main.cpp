@@ -30,12 +30,13 @@ Importer importer;
 Scene scene;
 
 void handleFileDrop(const char* filePath) {
+    std::string fileName = FileSystemUtils::getFileName(filePath);
     std::string path(filePath);
     std::string extension = path.substr(path.find_last_of('.') + 1);
-
+    
     if (extension == "fbx") {
         if (importer.loadFBX(filePath)) {
-            scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices());
+            scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices(), fileName);
 
             // Asigna la textura checker usando el nuevo método
             if (importer.getTextureID() == 0) {

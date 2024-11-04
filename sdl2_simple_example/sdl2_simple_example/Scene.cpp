@@ -10,13 +10,14 @@ Scene::~Scene() {
     gameObjects.clear();
 }
 
-void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const Transform& transform) {
+void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const std::string& name,  const Transform& transform) {
     Mesh* mesh = new Mesh(vertices, uvs, indices);
     GameObject* gameObject = new GameObject(mesh, nullptr);
 
     gameObject->setTransform(transform);
 
     gameObjects.push_back(gameObject);
+    gameObjectNames.push_back(name);
 }
 
 void Scene::setTexture(GLuint textureID) {

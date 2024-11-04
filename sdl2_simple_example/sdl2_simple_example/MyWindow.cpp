@@ -1,3 +1,4 @@
+#include "Scene.h"
 #include <exception>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
@@ -11,7 +12,7 @@
 #include <algorithm>
 
 using namespace std;
-
+extern Scene scene;
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta línea al principio del constructor
     open(title, width, height);
@@ -139,6 +140,9 @@ void MyWindow::draw() {
     // Jerarquía (vacía)
     ImGui::Begin("Jerarquia");
     ImGui::Text("Llista de GameObjects:");
+    for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
+        ImGui::Text("%s", scene.gameObjectNames[i].c_str()); // Mostrar el nombre del objeto
+    }
     ImGui::Text("Aquí se mostrará la jerarquía de GameObjects");
     ImGui::End();
 
