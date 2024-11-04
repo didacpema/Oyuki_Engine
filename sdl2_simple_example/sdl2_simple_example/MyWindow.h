@@ -11,17 +11,24 @@ public:
 
 class MyWindow {
 
+<<<<<<< Updated upstream
 	SDL_Window* _window = nullptr;
 	void* _ctx = nullptr;
 
 	unsigned short _width = 800;
 	unsigned short _height = 600;
 
+=======
+    unsigned short _width = 800;
+    unsigned short _height = 600;
+    
+>>>>>>> Stashed changes
 public:
 	int width() const { return _width; }
 	int height() const { return _height; }
 	double aspect() const { return static_cast<double>(_width) / _height; }
 
+<<<<<<< Updated upstream
 	auto* windowPtr() const { return _window; }
 	auto* contextPtr() const { return _ctx; }
 
@@ -30,6 +37,15 @@ public:
 	MyWindow(const MyWindow&) = delete;
 	MyWindow& operator=(const MyWindow&) = delete;
 	~MyWindow();
+=======
+    float cameraDistance = 5.0f; // Distancia inicial de la cámara (zoom)
+    float cameraAngleX = 0.0f; // Ángulo de rotación en el eje X
+    float cameraAngleY = 0.0f; // Ángulo de rotación en el eje Y
+    float panX = 0.0f, panY = 0.0f; // Desplazamiento de la cámara (pan)
+	float cameraSpeed = 0.1f; // Velocidad de movimiento de la cámara
+    SDL_Window* windowPtr() const { return _window; }
+    void* contextPtr() const { return _ctx; }
+>>>>>>> Stashed changes
 
 	void open(const char* title, unsigned short width, unsigned short height);
 	void close();
