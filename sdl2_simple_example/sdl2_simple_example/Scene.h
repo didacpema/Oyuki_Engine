@@ -11,6 +11,10 @@ public:
     void setTexture(GLuint textureID);
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
+
     std::vector<GameObject*> gameObjects;
     std::vector<std::string> gameObjectNames;
+
+    // Índice del objeto seleccionado (-1 si no hay ninguno)
+    int selectedGameObjectIndex = -1;
 };

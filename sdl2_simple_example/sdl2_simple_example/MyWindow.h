@@ -46,6 +46,7 @@ public:
 
     void logMessage(const std::string& message);  // Método para agregar mensajes al LOG
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG
+
 };
 
 extern void handleFileDrop(const char* filePath);

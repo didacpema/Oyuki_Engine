@@ -22,7 +22,9 @@
 
 using namespace std;
 using hrclock = chrono::high_resolution_clock;
+using ivec2 = glm::ivec2;
 
+static const ivec2 WINDOW_SIZE(800, 600);
 static const unsigned int FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 
@@ -57,7 +59,7 @@ void handleFileDrop(const char* filePath) {
 }
 
 int main(int argc, char** argv) {
-    MyWindow myWindow("SDL2 Simple Example", 1024, 720);
+    MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
     importer.setWindow(&myWindow);
 
     myWindow.logMessage("Initializing SDL...");
@@ -74,7 +76,7 @@ int main(int argc, char** argv) {
     myWindow.logMessage("DevIL initialized successfully.");
 
     myWindow.logMessage("Initializing OpenGL context...");
-    Renderer::initOpenGL();
+    Renderer::initOpenGL(WINDOW_SIZE);
     Renderer::setupProjection(45.0f, 1.0f, 0.1f, 100.0f);
     myWindow.logMessage("OpenGL context initialized.");
 

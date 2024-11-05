@@ -11,13 +11,11 @@ public:
     void draw() const;
     void setTexture(Texture* texture);
 
-    // Método para obtener la textura actual
-    Texture* getTexture() const;
+    Texture* getTexture() const { return texture; }
+    Mesh* getMesh() const { return mesh; }
 
-    // Método para establecer la transformación desde fuera de la clase
     void setTransform(const Transform& newTransform);
 
-private:
     Mesh* mesh;
     Texture* texture;
     Transform transform;

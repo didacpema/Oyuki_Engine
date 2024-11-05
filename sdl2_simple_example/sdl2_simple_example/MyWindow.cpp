@@ -141,22 +141,72 @@ void MyWindow::draw() {
     ImGui::Begin("Jerarquia");
     ImGui::Text("Llista de GameObjects:");
     for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
-        ImGui::Text("%s", scene.gameObjectNames[i].c_str()); // Mostrar el nombre del objeto
+        bool isSelected = (scene.selectedGameObjectIndex == i);
+        if (ImGui::Selectable(scene.gameObjectNames[i].c_str(), isSelected)) {
+            scene.selectedGameObjectIndex = i; // Actualiza el índice del objeto seleccionado
+        }
     }
-    ImGui::Text("Aquí se mostrará la jerarquía de GameObjects");
     ImGui::End();
 
     // Inspector (vacío)
     ImGui::Begin("Inspector");
-    ImGui::Text("Informació del GameObject seleccionat");
-    ImGui::Text("Component: Transform");
-    ImGui::Text("Posició: (0,0,0)");
-    ImGui::Text("Rotació: (0,0,0)");
-    ImGui::Text("Escala: (1,1,1)");
-    ImGui::Text("Component: Mesh");
-    ImGui::Text("Informació de la malla carregada");
-    ImGui::Text("Component: Texture");
-    ImGui::Text("Mida de la textura i camí");
+
+    if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
+        GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
+
+        ImGui::Text("Informació del GameObject seleccionat");
+
+        // Display Transform (already added)
+        float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
+        if (ImGui::InputFloat3("Posició", position)) {
+            selectedObject->transform.position = { position[0], position[1], position[2] };
+        }
+
+        // Display Texture ID
+        if (selectedObject->getTexture()) {
+            GLuint textureID = selectedObject->getTexture()->getTextureID();
+            ImGui::Text("Texture ID: %u", textureID);
+        }
+        else {
+            ImGui::Text("Texture ID: None");
+        }
+
+        // Display Mesh Information
+        if (selectedObject->getMesh()) {
+            const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
+            const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
+            const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
+
+            ImGui::Text("Mesh Information:");
+            ImGui::Text("Vertices: %zu", vertices.size());
+            ImGui::Text("UVs: %zu", uvs.size());
+            ImGui::Text("Indices: %zu", indices.size());
+
+            // Optionally, display a preview of some vertices, uvs, and indices
+            ImGui::Separator();
+            ImGui::Text("Vertices Preview:");
+            for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
+                ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
+            }
+
+            ImGui::Text("UVs Preview:");
+            for (size_t i = 0; i < std::min<size_t>(uvs.size(), 6); i += 2) {
+                ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
+            }
+
+            ImGui::Text("Indices Preview:");
+            for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
+                ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
+            }
+        }
+        else {
+            ImGui::Text("Mesh: None");
+        }
+    }
+    else {
+        ImGui::Text("Seleccione un GameObject de la jerarquia para ver sus propiedades.");
+    }
+
     ImGui::End();
 
     // Popup "About"
