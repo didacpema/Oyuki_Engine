@@ -13,7 +13,7 @@
 
 using namespace std;
 extern Scene scene;
-MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) {
+MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta línea al principio del constructor
     open(title, width, height);
 
@@ -69,6 +69,16 @@ void MyWindow::close() {
 }
 
 void MyWindow::draw() {
+
+    Uint32 currentTime = SDL_GetTicks();
+    frameCount++;
+
+    // Calcular FPS cada segundo
+    if (currentTime - lastTime >= 1000) {
+        fps = frameCount / ((currentTime - lastTime) / 1000.0f);
+        frameCount = 0;
+        lastTime = currentTime;
+    }
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
@@ -136,9 +146,11 @@ void MyWindow::draw() {
         ImGui::Text("Gràfic FPS (Placeholder)");
         static float values[90] = {};
         static int values_offset = 0;
-        values[values_offset] = 60.0f; // Ejemplo fijo de FPS
+        values[values_offset] = fps; // Ejemplo fijo de FPS
         values_offset = (values_offset + 1) % 90;
-        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, "FPS", 0.0f, 100.0f, ImVec2(0, 80));
+        char fpsText[16];
+        sprintf_s(fpsText, "%d fps", static_cast<int>(fps));
+        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, fpsText, 0.0f, 100.0f, ImVec2(0, 80));
 
         // Opciones de configuración de módulos (placeholder)
         ImGui::Text("Configuració de cada mòdul:");
@@ -252,6 +264,9 @@ void MyWindow::draw() {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+
 }
 
 void MyWindow::swapBuffers() const {
