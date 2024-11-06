@@ -8,16 +8,25 @@
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
+#include "experimental/deque"
 #include <cmath>
 #include <algorithm>
 
 using namespace std;
 extern Scene scene;
+ImGuiIO* g_io = nullptr;
+
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta línea al principio del constructor
     open(title, width, height);
 
     ImGui::CreateContext();
+
+    g_io = &ImGui::GetIO();
+    g_io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard 
+    g_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
+    g_io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable multiple viewports
+
     ImGui_ImplSDL2_InitForOpenGL(_window, _ctx);
     ImGui_ImplOpenGL3_Init("#version 130");
 
@@ -119,6 +128,8 @@ void MyWindow::draw() {
 
         ImGui::EndMainMenuBar();
     }
+    //COMENTA ESTA LINEA PARA SER FELIZ
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
 
     if (isConsolaOn)
     {
@@ -249,9 +260,17 @@ void MyWindow::draw() {
         ImGui::Text("Desenvolupat amb SDL, OpenGL, ImGui, Assimp, DevIL");
         ImGui::EndPopup();
     }
+    
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if (g_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        SDL_GL_MakeCurrent(_window, _ctx);
+    }
+
 }
 
 void MyWindow::swapBuffers() const {
@@ -300,7 +319,7 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
                     
                 }
 			}
-			if (e.key.keysym.sym == SDLK_s) {
+			if (e.key.keysym.sym == SDLK_s) {   
 				if (SDL_KEYDOWN) {
 					panY -= 0.1f;
 				}
