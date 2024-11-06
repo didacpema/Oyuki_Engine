@@ -10,7 +10,6 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 #include "MemoryUsage.h"
-#include "experimental/deque"
 #include <cmath>
 #include <algorithm>
 
@@ -141,7 +140,15 @@ void MyWindow::draw() {
             }
             ImGui::EndMenu();
         }
-
+		if (ImGui::BeginMenu("GameObject")) {
+			if (ImGui::MenuItem("Cube")) {
+                scene.createCube(" Cubo");
+			}
+			if (ImGui::MenuItem("Sphere")) {
+				scene.createSphere(" Esfera");
+			}
+			ImGui::EndMenu();
+		}
         ImGui::EndMainMenuBar();
     }
     //COMENTA ESTA LINEA PARA SER FELIZ
