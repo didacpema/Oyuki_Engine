@@ -142,6 +142,7 @@
     <ClInclude Include="FilesystemUtils.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="MemoryUsage.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MyWindow.h" />
     <ClInclude Include="Renderer.h" />

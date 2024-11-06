@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
+#include "MemoryUsage.h"
 #include <cmath>
 #include <algorithm>
 
@@ -142,7 +143,7 @@ void MyWindow::draw() {
     {
         ImGui::Begin("Config");
         ImGui::Text("Configuració general del sistema");
-        // Placeholder para gráfico de FPS
+        //gráfico de FPS
         ImGui::Text("Gràfic FPS (Placeholder)");
         static float values[90] = {};
         static int values_offset = 0;
@@ -156,8 +157,32 @@ void MyWindow::draw() {
         ImGui::Text("Configuració de cada mòdul:");
         ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
 
-        // Placeholder para consumo de memoria y detección de hardware
+        //consumo de memoria y detección de hardware
         ImGui::Text("Consum de Memòria: ");
+        try {
+            MemoryInfo memInfo = MemoryUsage::getMemoryInfo();
+            ImGui::Separator();
+            ImGui::Text("Consumo de Memoria:");
+            ImGui::Text("Memoria Total: %llu MB", memInfo.totalMemory);
+            ImGui::Text("Memoria Libre: %llu MB", memInfo.freeMemory);
+            ImGui::Text("Memoria Usada: %llu MB", memInfo.usedMemory);
+            static float totalMemoryValues[90];
+            static float freeMemoryValues[90];
+            static float usedMemoryValues[90];
+            static int memValuesOffset = 0;
+
+            totalMemoryValues[memValuesOffset] = memInfo.totalMemory;
+            freeMemoryValues[memValuesOffset] = memInfo.freeMemory;
+            usedMemoryValues[memValuesOffset] = memInfo.usedMemory;
+            memValuesOffset = (values_offset + 1) % 90;
+
+            ImGui::PlotLines("TotalMem", totalMemoryValues, IM_ARRAYSIZE(totalMemoryValues), memValuesOffset, "TotalMem", 0.0f, 100.0f, ImVec2(0, 80));
+            ImGui::PlotLines("freeMem", freeMemoryValues, IM_ARRAYSIZE(freeMemoryValues), memValuesOffset, "FreeMem", 0.0f, 100.0f, ImVec2(0, 80));
+            ImGui::PlotLines("UsedMem", usedMemoryValues, IM_ARRAYSIZE(usedMemoryValues), memValuesOffset, "UsedMem", 0.0f, 100.0f, ImVec2(0, 80));
+        }
+        catch (const std::exception& e) {
+            ImGui::Text("Error obteniendo memoria: %s", e.what());
+        }
         ImGui::Text("Detecció de maquinari i versions de programari:");
         ImGui::Text("SDL, OpenGL, DevIL");
         ImGui::End();
