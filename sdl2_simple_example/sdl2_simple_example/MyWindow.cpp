@@ -294,27 +294,52 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
             }
             break;
 		case SDL_KEYDOWN:
-			if(e.key.keysym.sym == SDLK_w) {
-                if (SDL_KEYDOWN) {
-                    panY += 0.1f;
-                    
+            if (e.key.keysym.sym == SDLK_w) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panY += camSpeed * 2;
                 }
-			}
-			if (e.key.keysym.sym == SDLK_s) {
-				if (SDL_KEYDOWN) {
-					panY -= 0.1f;
-				}
-			}
-			if (e.key.keysym.sym == SDLK_a) {
-				if (SDL_KEYDOWN) {
-					panX-= 0.1f;
-				}
-			}
-			if (e.key.keysym.sym == SDLK_d) {
-				if (SDL_KEYDOWN) {
-					panX += 0.1f;
-				}
-			}
+                else
+                {
+                    panY += camSpeed;
+                }
+
+
+            }
+            if (e.key.keysym.sym == SDLK_s) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panY -= camSpeed * 2;
+                }
+                else
+                {
+                    panY -= camSpeed;
+                }
+
+
+            }
+            if (e.key.keysym.sym == SDLK_a) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panX -= camSpeed * 2;
+                }
+                else
+                {
+                    panX -= camSpeed;
+                }
+            }
+            if (e.key.keysym.sym == SDLK_d) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panX += camSpeed * 2;
+                }
+                else
+                {
+                    panX += camSpeed;
+                }
+
+
+            }
 			
 			break;
         case SDL_MOUSEWHEEL:
