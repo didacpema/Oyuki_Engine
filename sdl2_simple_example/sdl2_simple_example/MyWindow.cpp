@@ -91,10 +91,22 @@ void MyWindow::draw() {
         }
 
         if (ImGui::BeginMenu("Editor")) {
-            ImGui::MenuItem("Consola", NULL, true);
-            ImGui::MenuItem("Config", NULL, true);
-            ImGui::MenuItem("Jerarquia", NULL, true);
-            ImGui::MenuItem("Inspector", NULL, true);
+            if (ImGui::MenuItem("Consola", NULL, isConsolaOn, true))
+            {
+                isConsolaOn = !isConsolaOn;
+            }
+            if (ImGui::MenuItem("Config", NULL, isConfigOn, true))
+            {
+                isConfigOn = !isConfigOn;
+            }
+            if (ImGui::MenuItem("Jerarquia", NULL, isJerarquiaOn, true))
+            {
+                isJerarquiaOn = !isJerarquiaOn;
+            }
+            if (ImGui::MenuItem("Inspector", NULL, isInspectorOn, true))
+            {
+                isInspectorOn =!isInspectorOn;
+            }
             ImGui::EndMenu();
         }
 
@@ -108,118 +120,127 @@ void MyWindow::draw() {
         ImGui::EndMainMenuBar();
     }
 
-    // Consola (vacía, sin contenido de LOG aún)
-    ImGui::Begin("Consola");
-    for (const auto& msg : logMessages) {
-        ImGui::Text("%s", msg.c_str());
+    if (isConsolaOn)
+    {
+        ImGui::Begin("Consola");
+        for (const auto& msg : logMessages) {
+            ImGui::Text("%s", msg.c_str());
+        }
+        ImGui::End();
     }
-    ImGui::End();
+    if (isConfigOn)
+    {
+        ImGui::Begin("Config");
+        ImGui::Text("Configuració general del sistema");
+        // Placeholder para gráfico de FPS
+        ImGui::Text("Gràfic FPS (Placeholder)");
+        static float values[90] = {};
+        static int values_offset = 0;
+        values[values_offset] = 60.0f; // Ejemplo fijo de FPS
+        values_offset = (values_offset + 1) % 90;
+        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, "FPS", 0.0f, 100.0f, ImVec2(0, 80));
 
-    // Configuración (vacía)
-    ImGui::Begin("Config");
-    ImGui::Text("Configuració general del sistema");
+        // Opciones de configuración de módulos (placeholder)
+        ImGui::Text("Configuració de cada mòdul:");
+        ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
 
-    // Placeholder para gráfico de FPS
-    ImGui::Text("Gràfic FPS (Placeholder)");
-    static float values[90] = {};
-    static int values_offset = 0;
-    values[values_offset] = 60.0f; // Ejemplo fijo de FPS
-    values_offset = (values_offset + 1) % 90;
-    ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, "FPS", 0.0f, 100.0f, ImVec2(0, 80));
-
-    // Opciones de configuración de módulos (placeholder)
-    ImGui::Text("Configuració de cada mòdul:");
-    ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
-
-    // Placeholder para consumo de memoria y detección de hardware
-    ImGui::Text("Consum de Memòria: ");
-    ImGui::Text("Detecció de maquinari i versions de programari:");
-    ImGui::Text("SDL, OpenGL, DevIL");
-    ImGui::End();
-
-    // Jerarquía (vacía)
-    ImGui::Begin("Jerarquia");
-    ImGui::Text("Llista de GameObjects:");
-    for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
-        bool isSelected = (scene.selectedGameObjectIndex == i);
-        if (ImGui::Selectable(scene.gameObjectNames[i].c_str(), isSelected)) {
-            scene.selectedGameObjectIndex = i; // Actualiza el índice del objeto seleccionado
-        }
+        // Placeholder para consumo de memoria y detección de hardware
+        ImGui::Text("Consum de Memòria: ");
+        ImGui::Text("Detecció de maquinari i versions de programari:");
+        ImGui::Text("SDL, OpenGL, DevIL");
+        ImGui::End();
     }
-    ImGui::End();
 
-    // Inspector (vacío)
-    ImGui::Begin("Inspector");
-
-    if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
-        GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
-
-        ImGui::Text("Información del GameObject seleccionado");
-
-        // Mostrar y modificar la posición
-        float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
-        if (ImGui::InputFloat3("Posición", position)) {
-            selectedObject->transform.position = { position[0], position[1], position[2] };
+    if (isJerarquiaOn)
+    {
+        // Jerarquía (vacía)
+        ImGui::Begin("Jerarquia");
+        ImGui::Text("Llista de GameObjects:");
+        for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
+            bool isSelected = (scene.selectedGameObjectIndex == i);
+            if (ImGui::Selectable(scene.gameObjectNames[i].c_str(), isSelected)) {
+                scene.selectedGameObjectIndex = i; // Actualiza el índice del objeto seleccionado
+            }
         }
+        ImGui::End();
+    }
+    if (isInspectorOn)
+    {
 
-        // Mostrar y modificar la rotación
-        float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
-        if (ImGui::InputFloat3("Rotación", rotation)) {
-            selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
-        }
+        // Inspector (vacío)
+        ImGui::Begin("Inspector");
 
-        // Mostrar y modificar la escala
-        float scale[3] = { selectedObject->transform.scale.x, selectedObject->transform.scale.y, selectedObject->transform.scale.z };
-        if (ImGui::InputFloat3("Escala", scale)) {
-            selectedObject->transform.scale = { scale[0], scale[1], scale[2] };
-        }
+        if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
+            GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
 
-        // Mostrar el Texture ID (si existe)
-        if (selectedObject->getTexture()) {
-            GLuint textureID = selectedObject->getTexture()->getTextureID();
-            ImGui::Text("Texture ID: %u", textureID);
+            ImGui::Text("Información del GameObject seleccionado");
+
+            // Mostrar y modificar la posición
+            float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
+            if (ImGui::InputFloat3("Posición", position)) {
+                selectedObject->transform.position = { position[0], position[1], position[2] };
+            }
+
+            // Mostrar y modificar la rotación
+            float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
+            if (ImGui::InputFloat3("Rotación", rotation)) {
+                selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
+            }
+
+            // Mostrar y modificar la escala
+            float scale[3] = { selectedObject->transform.scale.x, selectedObject->transform.scale.y, selectedObject->transform.scale.z };
+            if (ImGui::InputFloat3("Escala", scale)) {
+                selectedObject->transform.scale = { scale[0], scale[1], scale[2] };
+            }
+
+            // Mostrar el Texture ID (si existe)
+            if (selectedObject->getTexture()) {
+                GLuint textureID = selectedObject->getTexture()->getTextureID();
+                ImGui::Text("Texture ID: %u", textureID);
+            }
+            else {
+                ImGui::Text("Texture ID: None");
+            }
+
+            // Mostrar la información de la malla
+            if (selectedObject->getMesh()) {
+                const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
+                const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
+                const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
+
+                ImGui::Text("Información de la Malla:");
+                ImGui::Text("Vertices: %zu", vertices.size());
+                ImGui::Text("UVs: %zu", uvs.size());
+                ImGui::Text("Indices: %zu", indices.size());
+
+                // Mostrar una vista previa opcional
+                ImGui::Separator();
+                ImGui::Text("Vista previa de vértices:");
+                for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
+                    ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
+                }
+
+                ImGui::Text("Vista previa de UVs:");
+                for (size_t i = 0; i < std::min<size_t>(uvs.size(), 6); i += 2) {
+                    ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
+                }
+
+                ImGui::Text("Vista previa de índices:");
+                for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
+                    ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
+                }
+            }
+            else {
+                ImGui::Text("Malla: Ninguna");
+            }
         }
         else {
-            ImGui::Text("Texture ID: None");
+            ImGui::Text("Seleccione un GameObject de la jerarquía para ver sus propiedades.");
         }
 
-        // Mostrar la información de la malla
-        if (selectedObject->getMesh()) {
-            const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
-            const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
-            const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
-
-            ImGui::Text("Información de la Malla:");
-            ImGui::Text("Vertices: %zu", vertices.size());
-            ImGui::Text("UVs: %zu", uvs.size());
-            ImGui::Text("Indices: %zu", indices.size());
-
-            // Mostrar una vista previa opcional
-            ImGui::Separator();
-            ImGui::Text("Vista previa de vértices:");
-            for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
-                ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
-            }
-
-            ImGui::Text("Vista previa de UVs:");
-            for (size_t i = 0; i < std::min<size_t>(uvs.size(), 6); i += 2) {
-                ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
-            }
-
-            ImGui::Text("Vista previa de índices:");
-            for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
-                ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
-            }
-        }
-        else {
-            ImGui::Text("Malla: Ninguna");
-        }
+        ImGui::End();
     }
-    else {
-        ImGui::Text("Seleccione un GameObject de la jerarquía para ver sus propiedades.");
-    }
-
-    ImGui::End();
+    
 
     // Popup "About"
     if (ImGui::BeginPopup("AboutPopup")) {

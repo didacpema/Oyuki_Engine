@@ -26,6 +26,10 @@ public:
     float cameraAngleX = 0.0f; // Ángulo de rotación en el eje X
     float cameraAngleY = 0.0f; // Ángulo de rotación en el eje Y
     float panX = 0.0f, panY = 0.0f; // Desplazamiento de la cámara (pan)
+    bool isConsolaOn = true;
+    bool isConfigOn = true;
+    bool isJerarquiaOn = true;
+    bool isInspectorOn = true;
 
     SDL_Window* windowPtr() const { return _window; }
     void* contextPtr() const { return _ctx; }

@@ -11,7 +11,7 @@ void Renderer::initOpenGL(ivec2 WINDOW_SIZE) {
     if (!GLEW_VERSION_3_0) throw std::exception("OpenGL 3.0 API is not available.");
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.5, 0.5, 0.5, 1.0);
+    glClearColor(0, 0, 0, 1.0);
 
     // Store the window size
     Renderer::_WINDOW_SIZE = WINDOW_SIZE;
