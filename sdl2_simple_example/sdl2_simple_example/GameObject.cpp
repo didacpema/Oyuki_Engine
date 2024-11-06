@@ -20,18 +20,31 @@ void GameObject::setTransform(const Transform& newTransform) {
 }
 
 void GameObject::draw() const {
-    glPushMatrix(); // Guardar la matriz actual
+    glPushMatrix();  // Save the current matrix
 
-    // Aplicar transformaciones en modo fijo
+    // Apply transformations based on the GameObject's transform
     glTranslatef(transform.position.x, transform.position.y, transform.position.z);
     glRotatef(transform.rotation.x, 1.0f, 0.0f, 0.0f);
     glRotatef(transform.rotation.y, 0.0f, 1.0f, 0.0f);
     glRotatef(transform.rotation.z, 0.0f, 0.0f, 1.0f);
     glScalef(transform.scale.x, transform.scale.y, transform.scale.z);
 
-    if (texture) texture->bind(); // Vincular la textura si está disponible
-    if (mesh) mesh->render();     // Renderizar la malla
-    if (texture) texture->unbind();
+    // Enable textures if there is a texture bound
+    if (texture) {
+        glEnable(GL_TEXTURE_2D);
+        texture->bind();  // Bind the object's texture
+    }
+    else {
+        glDisable(GL_TEXTURE_2D);  // Disable if no texture
+    }
 
-    glPopMatrix(); // Restaurar la matriz anterior
+    if (mesh) mesh->render();  // Render the mesh
+
+    // Unbind and disable texture after rendering to prevent interference with other objects
+    if (texture) {
+        texture->unbind();
+        glDisable(GL_TEXTURE_2D);
+    }
+
+    glPopMatrix();  // Restore the previous matrix
 }

@@ -22,10 +22,10 @@ void Renderer::initOpenGL(ivec2 WINDOW_SIZE) {
 }
 
 void Renderer::drawGrid(float spacing) {
-    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);  // Disable texture for the grid lines
     float gridRange = 1000.0f;
 
-    glColor3f(0.75f, 0.4f, 0.8f);  // Bright white for grid lines
+    glColor3f(1.0f, 1.0f, 1.0f);  // Set grid color
     glBegin(GL_LINES);
 
     for (float i = -gridRange; i <= gridRange; i += spacing) {
