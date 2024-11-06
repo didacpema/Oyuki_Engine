@@ -152,21 +152,21 @@ GLuint Importer::loadTexture(const std::string& texturePath) {
     if (!ilLoadImage((const wchar_t*)texturePath.c_str())) {
         ilDeleteImages(1, &imageID);
         std::cerr << "Failed to load texture from: " << texturePath << std::endl;
-        return 0;
+        return 0;  // Return 0 if loading fails
     }
 
-    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);  // Ensure RGBA format for OpenGL
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Specify texture parameters
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    ilDeleteImages(1, &imageID);
-
-    std::cerr << "Texture loaded" << std::endl;
+    ilDeleteImages(1, &imageID);  // Clean up DevIL image
     return textureID;
 }
 

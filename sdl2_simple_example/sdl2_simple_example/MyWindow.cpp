@@ -16,8 +16,8 @@ using namespace std;
 extern Scene scene;
 ImGuiIO* g_io = nullptr;
 
-MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) {
-    SDL_Init(SDL_INIT_VIDEO);  // Mueve esta línea al principio del constructor
+MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
+    SDL_Init(SDL_INIT_VIDEO);  // Mueve esta lï¿½nea al principio del constructor
     open(title, width, height);
 
     ImGui::CreateContext();
@@ -78,11 +78,21 @@ void MyWindow::close() {
 }
 
 void MyWindow::draw() {
+
+    Uint32 currentTime = SDL_GetTicks();
+    frameCount++;
+
+    // Calcular FPS cada segundo
+    if (currentTime - lastTime >= 1000) {
+        fps = frameCount / ((currentTime - lastTime) / 1000.0f);
+        frameCount = 0;
+        lastTime = currentTime;
+    }
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    // Barra de menú principal
+    // Barra de menï¿½ principal
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Menu")) {
             if (ImGui::MenuItem("Salir")) {
@@ -91,7 +101,7 @@ void MyWindow::draw() {
                 SDL_PushEvent(&quit_event);
             }
             if (ImGui::MenuItem("GitHub")) {
-                // Aquí podríamos abrir el enlace de GitHub
+                // Aquï¿½ podrï¿½amos abrir el enlace de GitHub
             }
             if (ImGui::MenuItem("Sobre el motor")) {
                 ImGui::OpenPopup("AboutPopup");
@@ -119,9 +129,9 @@ void MyWindow::draw() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Formes bàsiques")) {
-            if (ImGui::MenuItem("Cargar Forma Bàsica")) {
-                // Aquí se manejará la carga de formas
+        if (ImGui::BeginMenu("Formes bï¿½siques")) {
+            if (ImGui::MenuItem("Cargar Forma Bï¿½sica")) {
+                // Aquï¿½ se manejarï¿½ la carga de formas
             }
             ImGui::EndMenu();
         }
@@ -142,35 +152,37 @@ void MyWindow::draw() {
     if (isConfigOn)
     {
         ImGui::Begin("Config");
-        ImGui::Text("Configuració general del sistema");
-        // Placeholder para gráfico de FPS
-        ImGui::Text("Gràfic FPS (Placeholder)");
+        ImGui::Text("Configuraciï¿½ general del sistema");
+        // Placeholder para grï¿½fico de FPS
+        ImGui::Text("Grï¿½fic FPS (Placeholder)");
         static float values[90] = {};
         static int values_offset = 0;
-        values[values_offset] = 60.0f; // Ejemplo fijo de FPS
+        values[values_offset] = fps; // Ejemplo fijo de FPS
         values_offset = (values_offset + 1) % 90;
-        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, "FPS", 0.0f, 100.0f, ImVec2(0, 80));
+        char fpsText[16];
+        sprintf_s(fpsText, "%d fps", static_cast<int>(fps));
+        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, fpsText, 0.0f, 100.0f, ImVec2(0, 80));
 
-        // Opciones de configuración de módulos (placeholder)
-        ImGui::Text("Configuració de cada mòdul:");
+        // Opciones de configuraciï¿½n de mï¿½dulos (placeholder)
+        ImGui::Text("Configuraciï¿½ de cada mï¿½dul:");
         ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
 
-        // Placeholder para consumo de memoria y detección de hardware
-        ImGui::Text("Consum de Memòria: ");
-        ImGui::Text("Detecció de maquinari i versions de programari:");
+        // Placeholder para consumo de memoria y detecciï¿½n de hardware
+        ImGui::Text("Consum de Memï¿½ria: ");
+        ImGui::Text("Detecciï¿½ de maquinari i versions de programari:");
         ImGui::Text("SDL, OpenGL, DevIL");
         ImGui::End();
     }
 
     if (isJerarquiaOn)
     {
-        // Jerarquía (vacía)
+        // Jerarquï¿½a (vacï¿½a)
         ImGui::Begin("Jerarquia");
         ImGui::Text("Llista de GameObjects:");
         for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
             bool isSelected = (scene.selectedGameObjectIndex == i);
             if (ImGui::Selectable(scene.gameObjectNames[i].c_str(), isSelected)) {
-                scene.selectedGameObjectIndex = i; // Actualiza el índice del objeto seleccionado
+                scene.selectedGameObjectIndex = i; // Actualiza el ï¿½ndice del objeto seleccionado
             }
         }
         ImGui::End();
@@ -178,23 +190,23 @@ void MyWindow::draw() {
     if (isInspectorOn)
     {
 
-        // Inspector (vacío)
+        // Inspector (vacï¿½o)
         ImGui::Begin("Inspector");
 
         if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
             GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
 
-            ImGui::Text("Información del GameObject seleccionado");
+            ImGui::Text("Informaciï¿½n del GameObject seleccionado");
 
-            // Mostrar y modificar la posición
+            // Mostrar y modificar la posiciï¿½n
             float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
-            if (ImGui::InputFloat3("Posición", position)) {
+            if (ImGui::InputFloat3("Posiciï¿½n", position)) {
                 selectedObject->transform.position = { position[0], position[1], position[2] };
             }
 
-            // Mostrar y modificar la rotación
+            // Mostrar y modificar la rotaciï¿½n
             float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
-            if (ImGui::InputFloat3("Rotación", rotation)) {
+            if (ImGui::InputFloat3("Rotaciï¿½n", rotation)) {
                 selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
             }
 
@@ -213,20 +225,20 @@ void MyWindow::draw() {
                 ImGui::Text("Texture ID: None");
             }
 
-            // Mostrar la información de la malla
+            // Mostrar la informaciï¿½n de la malla
             if (selectedObject->getMesh()) {
                 const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
                 const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
                 const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
 
-                ImGui::Text("Información de la Malla:");
+                ImGui::Text("Informaciï¿½n de la Malla:");
                 ImGui::Text("Vertices: %zu", vertices.size());
                 ImGui::Text("UVs: %zu", uvs.size());
                 ImGui::Text("Indices: %zu", indices.size());
 
                 // Mostrar una vista previa opcional
                 ImGui::Separator();
-                ImGui::Text("Vista previa de vértices:");
+                ImGui::Text("Vista previa de vï¿½rtices:");
                 for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
                     ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
                 }
@@ -236,7 +248,7 @@ void MyWindow::draw() {
                     ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
                 }
 
-                ImGui::Text("Vista previa de índices:");
+                ImGui::Text("Vista previa de ï¿½ndices:");
                 for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
                     ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
                 }
@@ -246,7 +258,7 @@ void MyWindow::draw() {
             }
         }
         else {
-            ImGui::Text("Seleccione un GameObject de la jerarquía para ver sus propiedades.");
+            ImGui::Text("Seleccione un GameObject de la jerarquï¿½a para ver sus propiedades.");
         }
 
         ImGui::End();
@@ -255,8 +267,8 @@ void MyWindow::draw() {
 
     // Popup "About"
     if (ImGui::BeginPopup("AboutPopup")) {
-        ImGui::Text("Informació sobre el motor:");
-        ImGui::Text("Versió: 1.0");
+        ImGui::Text("Informaciï¿½ sobre el motor:");
+        ImGui::Text("Versiï¿½: 1.0");
         ImGui::Text("Desenvolupat amb SDL, OpenGL, ImGui, Assimp, DevIL");
         ImGui::EndPopup();
     }
@@ -289,7 +301,7 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         if (e.type == SDL_DROPFILE) {
             char* droppedFile = e.drop.file;
             logMessage("Archivo arrastrado: " + string(droppedFile));
-            handleFileDrop(droppedFile); // Tu función para manejar archivos
+            handleFileDrop(droppedFile); // Tu funciï¿½n para manejar archivos
             SDL_free(droppedFile);
             continue;
         }
@@ -313,27 +325,52 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
             }
             break;
 		case SDL_KEYDOWN:
-			if(e.key.keysym.sym == SDLK_w) {
-                if (SDL_KEYDOWN) {
-                    panY += 0.1f;
-                    
+            if (e.key.keysym.sym == SDLK_w) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panY += camSpeed * 2;
                 }
-			}
-			if (e.key.keysym.sym == SDLK_s) {   
-				if (SDL_KEYDOWN) {
-					panY -= 0.1f;
-				}
-			}
-			if (e.key.keysym.sym == SDLK_a) {
-				if (SDL_KEYDOWN) {
-					panX-= 0.1f;
-				}
-			}
-			if (e.key.keysym.sym == SDLK_d) {
-				if (SDL_KEYDOWN) {
-					panX += 0.1f;
-				}
-			}
+                else
+                {
+                    panY += camSpeed;
+                }
+
+
+            }
+            if (e.key.keysym.sym == SDLK_s) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panY -= camSpeed * 2;
+                }
+                else
+                {
+                    panY -= camSpeed;
+                }
+
+
+            }
+            if (e.key.keysym.sym == SDLK_a) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panX -= camSpeed * 2;
+                }
+                else
+                {
+                    panX -= camSpeed;
+                }
+            }
+            if (e.key.keysym.sym == SDLK_d) {
+                if (e.key.keysym.mod & KMOD_SHIFT)
+                {
+                    panX += camSpeed * 2;
+                }
+                else
+                {
+                    panX += camSpeed;
+                }
+
+
+            }
 			
 			break;
         case SDL_MOUSEWHEEL:

@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
     myWindow.logMessage("Initializing OpenGL context...");
     Renderer::initOpenGL(WINDOW_SIZE);
-    Renderer::setupProjection(45.0f, 1.0f, 0.1f, 100.0f);
+    Renderer::setupProjection(45.0f, 1.0f, 0.1f, 1000.0f);
     myWindow.logMessage("OpenGL context initialized.");
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
@@ -85,8 +85,13 @@ int main(int argc, char** argv) {
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear color and depth buffers
+
         Renderer::setupView(myWindow.cameraDistance, myWindow.cameraAngleX, myWindow.cameraAngleY, myWindow.panX, myWindow.panY);
-        scene.drawScene();
+
+        Renderer::drawGrid(10.0f);  // Draw grid first
+
+        scene.drawScene();         // Draw objects in the scene
 
         myWindow.draw();
         myWindow.swapBuffers();

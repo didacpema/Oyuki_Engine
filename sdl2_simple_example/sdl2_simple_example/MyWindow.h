@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
+
+
 #include <string>
 #include <vector>
 
@@ -30,7 +32,11 @@ public:
     bool isConfigOn = true;
     bool isJerarquiaOn = true;
     bool isInspectorOn = true;
-
+    float camSpeed = 0.1;
+    //FPS
+    float fps = 0.0f;
+    int frameCount = 0;
+    Uint32 lastTime = 0;
     SDL_Window* windowPtr() const { return _window; }
     void* contextPtr() const { return _ctx; }
 
