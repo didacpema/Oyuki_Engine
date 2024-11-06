@@ -134,12 +134,6 @@ void MyWindow::draw() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Formes b�siques")) {
-            if (ImGui::MenuItem("Cargar Forma B�sica")) {
-                // Aqu� se manejar� la carga de formas
-            }
-            ImGui::EndMenu();
-        }
 		if (ImGui::BeginMenu("GameObject")) {
 			if (ImGui::MenuItem("Cube")) {
                 scene.createCube(" Cubo");
@@ -165,12 +159,8 @@ void MyWindow::draw() {
     if (isConfigOn)
     {
         ImGui::Begin("Config");
-        ImGui::Text("Configuraci� general del sistema");
-        //gr�fico de FPS
-        ImGui::Text("Gr�fic FPS (Placeholder)");
-        ImGui::Text("Configuraci� general del sistema");
-        // Placeholder para gr�fico de FPS
-        ImGui::Text("Gr�fic FPS (Placeholder)");
+        ImGui::Text("Configuracion general del sistema");
+        ImGui::Text("Grafico FPS");
         static float values[90] = {};
         static int values_offset = 0;
         values[values_offset] = fps; // Ejemplo fijo de FPS
@@ -179,12 +169,7 @@ void MyWindow::draw() {
         sprintf_s(fpsText, "%d fps", static_cast<int>(fps));
         ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, fpsText, 0.0f, 100.0f, ImVec2(0, 80));
 
-        // Opciones de configuraci�n de m�dulos (placeholder)
-        ImGui::Text("Configuraci� de cada m�dul:");
-        ImGui::Text(" - Renderitzador\n - Finestra\n - Entrada\n - Textures");
-
-        //consumo de memoria y detecci�n de hardware
-        ImGui::Text("Consum de Mem�ria: ");
+        ImGui::Text("Consumo de Memoria: ");
         try {
             MemoryInfo memInfo = MemoryUsage::getMemoryInfo();
             ImGui::Separator();
@@ -209,10 +194,7 @@ void MyWindow::draw() {
         catch (const std::exception& e) {
             ImGui::Text("Error obteniendo memoria: %s", e.what());
         }
-        ImGui::Text("Detecci� de maquinari i versions de programari:");
-        // Placeholder para consumo de memoria y detecci�n de hardware
-        ImGui::Text("Consum de Mem�ria: ");
-        ImGui::Text("Detecci� de maquinari i versions de programari:");
+        ImGui::Text("Deteccion de maquinaria i versions de programario:");
         ImGui::Text("SDL, OpenGL, DevIL");
         ImGui::End();
     }
@@ -261,17 +243,17 @@ void MyWindow::draw() {
         if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
             GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
 
-            ImGui::Text("Informaci�n del GameObject seleccionado");
+            ImGui::Text("Informacion del GameObject seleccionado");
 
             // Mostrar y modificar la posici�n
             float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
-            if (ImGui::InputFloat3("Posici�n", position)) {
+            if (ImGui::InputFloat3("Posicion", position)) {
                 selectedObject->transform.position = { position[0], position[1], position[2] };
             }
 
             // Mostrar y modificar la rotaci�n
             float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
-            if (ImGui::InputFloat3("Rotaci�n", rotation)) {
+            if (ImGui::InputFloat3("Rotacion", rotation)) {
                 selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
             }
 
@@ -296,14 +278,14 @@ void MyWindow::draw() {
                 const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
                 const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
 
-                ImGui::Text("Informaci�n de la Malla:");
+                ImGui::Text("Informacion de la Malla:");
                 ImGui::Text("Vertices: %zu", vertices.size());
                 ImGui::Text("UVs: %zu", uvs.size());
                 ImGui::Text("Indices: %zu", indices.size());
 
                 // Mostrar una vista previa opcional
                 ImGui::Separator();
-                ImGui::Text("Vista previa de v�rtices:");
+                ImGui::Text("Vista previa de vertices:");
                 for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
                     ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
                 }
@@ -313,7 +295,7 @@ void MyWindow::draw() {
                     ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
                 }
 
-                ImGui::Text("Vista previa de �ndices:");
+                ImGui::Text("Vista previa de indices:");
                 for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
                     ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
                 }
@@ -323,7 +305,7 @@ void MyWindow::draw() {
             }
         }
         else {
-            ImGui::Text("Seleccione un GameObject de la jerarqu�a para ver sus propiedades.");
+            ImGui::Text("Seleccione un GameObject de la jerarquia para ver sus propiedades.");
         }
 
         ImGui::End();
@@ -332,9 +314,9 @@ void MyWindow::draw() {
 
     // Popup "About"
     if (ImGui::BeginPopup("AboutPopup")) {
-        ImGui::Text("Informaci� sobre el motor:");
-        ImGui::Text("Versi�: 1.0");
-        ImGui::Text("Desenvolupat amb SDL, OpenGL, ImGui, Assimp, DevIL");
+        ImGui::Text("Informacion sobre el motor:");
+        ImGui::Text("Version: 1.0");
+        ImGui::Text("Desarrollado con SDL, OpenGL, ImGui, Assimp, DevIL");
         ImGui::EndPopup();
     }
     
