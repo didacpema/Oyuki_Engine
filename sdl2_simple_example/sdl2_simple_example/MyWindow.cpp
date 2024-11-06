@@ -140,7 +140,7 @@ void MyWindow::draw() {
         ImGui::EndMainMenuBar();
     }
     //COMENTA ESTA LINEA PARA SER FELIZ
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
+    //ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
 
     if (isConsolaOn)
     {

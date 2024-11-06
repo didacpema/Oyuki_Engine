@@ -133,6 +133,7 @@ bool Importer::loadFBX(const std::string& filePath) {
         }
     }
 
+    /*
     if (scene->mNumMaterials == 0) {
         textureID = createCheckerTexture();
         _window->logMessage("No texture found in model. Checker texture applied.");
@@ -140,6 +141,7 @@ bool Importer::loadFBX(const std::string& filePath) {
     else {
         _window->logMessage("Texture detected and applied.");
     }
+    */
 
     return true;
 }
