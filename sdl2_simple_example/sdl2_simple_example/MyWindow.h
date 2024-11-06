@@ -30,6 +30,7 @@ public:
     bool isConfigOn = true;
     bool isJerarquiaOn = true;
     bool isInspectorOn = true;
+    float camSpeed = 0.1;
 
     SDL_Window* windowPtr() const { return _window; }
     void* contextPtr() const { return _ctx; }
