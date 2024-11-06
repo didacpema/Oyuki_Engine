@@ -1,3 +1,4 @@
+#include "Renderer.h"
 #include "Scene.h"
 #include <exception>
 #include <SDL2/SDL_video.h>
@@ -16,6 +17,10 @@
 using namespace std;
 extern Scene scene;
 ImGuiIO* g_io = nullptr;
+
+float x = Renderer::eyeX;
+float y = Renderer::eyeY;
+float z = Renderer::eyeZ;
 
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta l�nea al principio del constructor
@@ -205,19 +210,41 @@ void MyWindow::draw() {
         ImGui::End();
     }
 
-    if (isJerarquiaOn)
-    {
-        // Jerarqu�a (vac�a)
-        ImGui::Begin("Jerarquia");
-        ImGui::Text("Llista de GameObjects:");
+    if (isJerarquiaOn) {
+        // Jerarquía (vacía)
+        ImGui::Begin("Jerarquía");
+        ImGui::Text("Lista de GameObjects:");
+
+        // Recorre todos los objetos en la jerarquía
         for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
+            // Verifica si el objeto está seleccionado (si el índice coincide con el seleccionado)
             bool isSelected = (scene.selectedGameObjectIndex == i);
-            if (ImGui::Selectable(scene.gameObjectNames[i].c_str(), isSelected)) {
-                scene.selectedGameObjectIndex = i; // Actualiza el �ndice del objeto seleccionado
+
+            // Dibuja el objeto y permite seleccionarlo
+            if (ImGui::Selectable((scene.gameObjectNames[i] + "###" + std::to_string(i)).c_str(), isSelected)) {
+                // Si el objeto seleccionado es diferente al actual, actualiza la selección
+                if (scene.selectedGameObjectIndex != i) {
+                    // Cambia el índice del objeto seleccionado
+                    scene.selectedGameObjectIndex = i;
+
+                    // No cambiamos la cámara aún, solo actualizamos el índice seleccionado
+                    logMessage("Objeto seleccionado.");
+                }
             }
         }
         ImGui::End();
     }
+
+    // Si el usuario pulsa 'F', movemos la cámara al objeto seleccionado
+    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F)) && scene.selectedGameObjectIndex != -1){
+        GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
+        panX = selectedObject->transform.position.x;
+        panY = selectedObject->transform.position.y;
+        cameraDistance = glm::distance(glm::vec3(x, y, z), selectedObject->transform.position); // Ajuste de distancia
+        logMessage("Cámara ajustada al objeto seleccionado.");
+    }
+
+
     if (isInspectorOn)
     {
 
@@ -332,7 +359,7 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         if (e.type == SDL_DROPFILE) {
             char* droppedFile = e.drop.file;
             logMessage("Archivo arrastrado: " + string(droppedFile));
-            handleFileDrop(droppedFile); // Tu funci�n para manejar archivos
+            handleFileDrop(droppedFile); // Tu función para manejar archivos
             SDL_free(droppedFile);
             continue;
         }
@@ -352,58 +379,53 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
                     cameraAngleY += e.motion.xrel * 0.005f;
                     cameraAngleX -= e.motion.yrel * 0.005f;
                 }
-               
             }
             break;
-		case SDL_KEYDOWN:
+        case SDL_KEYDOWN:
+            // Movimiento de cámara existente
             if (e.key.keysym.sym == SDLK_w) {
                 if (e.key.keysym.mod & KMOD_SHIFT)
-                {
                     panY += camSpeed * 2;
-                }
                 else
-                {
                     panY += camSpeed;
-                }
-
-
             }
             if (e.key.keysym.sym == SDLK_s) {
                 if (e.key.keysym.mod & KMOD_SHIFT)
-                {
                     panY -= camSpeed * 2;
-                }
                 else
-                {
                     panY -= camSpeed;
-                }
-
-
             }
             if (e.key.keysym.sym == SDLK_a) {
                 if (e.key.keysym.mod & KMOD_SHIFT)
-                {
                     panX -= camSpeed * 2;
-                }
                 else
-                {
                     panX -= camSpeed;
-                }
             }
             if (e.key.keysym.sym == SDLK_d) {
                 if (e.key.keysym.mod & KMOD_SHIFT)
-                {
                     panX += camSpeed * 2;
-                }
                 else
-                {
                     panX += camSpeed;
-                }
-
-
             }
-			
-			break;
+
+            // Nueva funcionalidad para enfocar el objeto seleccionado con tecla 'F'
+            if (e.key.keysym.sym == SDLK_f) {
+                // Verifica que haya un objeto seleccionado
+                if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
+                    GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
+
+                    // Cambia el pivote de la cámara a la posición del objeto seleccionado
+                    panX = selectedObject->transform.position.x;
+                    panY = selectedObject->transform.position.y;
+                    cameraDistance = glm::distance(glm::vec3(x, y, z), selectedObject->transform.position); // Ajuste de distancia
+
+                    logMessage("Cámara centrada en el objeto seleccionado.");
+                }
+                else {
+                    logMessage("No hay objeto seleccionado.");
+                }
+            }
+            break;
         case SDL_MOUSEWHEEL:
             cameraDistance += e.wheel.y > 0 ? -0.5f : 0.5f;
             cameraDistance = max(1.0f, cameraDistance);

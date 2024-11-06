@@ -13,6 +13,9 @@ public:
     static void setupView(float cameraDistance, float cameraAngleX, float cameraAngleY, float panX, float panY);
     static void drawGrid(float spacing);
 
+    // Nuevas variables miembro
+    static float eyeX, eyeY, eyeZ;
+
 private:
     static ivec2 _WINDOW_SIZE;
 };

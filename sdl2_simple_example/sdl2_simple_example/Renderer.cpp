@@ -6,6 +6,10 @@
 // Define the static member variable
 ivec2 Renderer::_WINDOW_SIZE;
 
+float Renderer::eyeX = 0.0f;  // Asignar un valor inicial
+float Renderer::eyeY = 0.0f;  // Asignar un valor inicial
+float Renderer::eyeZ = 0.0f;  // Asignar un valor inicial
+
 void Renderer::initOpenGL(ivec2 WINDOW_SIZE) {
     glewInit();
     if (!GLEW_VERSION_3_0) throw std::exception("OpenGL 3.0 API is not available.");
@@ -55,9 +59,10 @@ void Renderer::setupView(float cameraDistance, float cameraAngleX, float cameraA
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    float eyeX = cameraDistance * sin(cameraAngleY) * cos(cameraAngleX) + panX;
-    float eyeY = cameraDistance * sin(cameraAngleX) + panY;
-    float eyeZ = cameraDistance * cos(cameraAngleY) * cos(cameraAngleX);
+    // Actualiza las variables miembro con los valores calculados
+    eyeX = cameraDistance * sin(cameraAngleY) * cos(cameraAngleX) + panX;
+    eyeY = cameraDistance * sin(cameraAngleX) + panY;
+    eyeZ = cameraDistance * cos(cameraAngleY) * cos(cameraAngleX);
 
     gluLookAt(eyeX, eyeY, eyeZ, panX, panY, 0.0, 0.0, 1.0, 0.0);
 }
