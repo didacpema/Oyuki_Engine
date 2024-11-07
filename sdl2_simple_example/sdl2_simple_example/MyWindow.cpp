@@ -35,6 +35,24 @@ MyWindow::MyWindow(const char* title, unsigned short width, unsigned short heigh
     ImGui_ImplSDL2_InitForOpenGL(_window, _ctx);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    // Tema de colores a un estilo lila oscuro cercano al negro
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.02f, 0.1f, 0.9f);          // Fondo de la ventana
+    colors[ImGuiCol_TitleBg] = ImVec4(0.18f, 0.05f, 0.2f, 1.0f);           // Título de la ventana (sin focus)
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.22f, 0.05f, 0.25f, 1.0f);    // Título de la ventana (con focus)
+    colors[ImGuiCol_Border] = ImVec4(0.2f, 0.1f, 0.25f, 1.0f);             // Bordes
+    colors[ImGuiCol_FrameBg] = ImVec4(0.12f, 0.02f, 0.15f, 1.0f);          // Fondo de widgets como InputFloat3
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.2f, 0.1f, 0.25f, 1.0f);     // Fondo de widgets cuando están en hover
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.1f, 0.3f, 1.0f);      // Fondo de widgets cuando están activos
+    colors[ImGuiCol_Button] = ImVec4(0.15f, 0.05f, 0.2f, 1.0f);            // Botones
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.2f, 0.1f, 0.25f, 1.0f);      // Botones cuando están en hover
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.1f, 0.3f, 1.0f);       // Botones cuando están activos
+    colors[ImGuiCol_Header] = ImVec4(0.2f, 0.1f, 0.25f, 1.0f);             // Cabecera de listas desplegables
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.25f, 0.1f, 0.3f, 1.0f);      // Cabecera de listas desplegables en hover
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.3f, 0.15f, 0.35f, 1.0f);      // Cabecera de listas desplegables activas
+
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
@@ -43,6 +61,7 @@ MyWindow::~MyWindow() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
     close();
+    SDL_Quit();
 }
 
 void MyWindow::logMessage(const std::string& message) {
