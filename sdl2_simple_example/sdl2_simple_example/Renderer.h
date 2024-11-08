@@ -12,10 +12,10 @@ public:
     static void setupProjection(float fov, float aspectRatio, float nearPlane, float farPlane);
     static void setupView(float cameraDistance, float cameraAngleX, float cameraAngleY, float panX, float panY);
     static void drawGrid(float spacing);
+    void applyProjectionAndViewport(ivec2 selectedResolution);
 
     // Nuevas variables miembro
     static float eyeX, eyeY, eyeZ;
 
-private:
     static ivec2 _WINDOW_SIZE;
 };

@@ -67,3 +67,8 @@ void Renderer::setupView(float cameraDistance, float cameraAngleX, float cameraA
     gluLookAt(eyeX, eyeY, eyeZ, panX, panY, 0.0, 0.0, 1.0, 0.0);
 }
 
+void Renderer::applyProjectionAndViewport(ivec2 selectedResolution) {
+    glViewport(0, 0, selectedResolution.x, selectedResolution.y);  // Actualiza el viewport
+    // Asegúrate de usar selectedResolution para calcular el aspecto
+    setupProjection(45.0f, static_cast<float>(selectedResolution.x) / selectedResolution.y, 0.1f, 1000.0f);
+}

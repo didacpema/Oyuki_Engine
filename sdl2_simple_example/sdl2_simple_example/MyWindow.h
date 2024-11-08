@@ -1,5 +1,5 @@
 #pragma once
-
+#include <glm/glm.hpp>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
 
@@ -56,6 +56,10 @@ public:
 
     void logMessage(const std::string& message);  // Método para agregar mensajes al LOG
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG
+
+    glm::ivec2 selectedResolution;
+
+    bool isFullscreen = false;
 
 };
 
