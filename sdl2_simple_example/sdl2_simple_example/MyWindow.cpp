@@ -128,10 +128,12 @@ void MyWindow::draw() {
                 SDL_PushEvent(&quit_event);
             }
             if (ImGui::MenuItem("GitHub")) {
+                SDL_OpenURL("https://github.com/didacpema/Oyuki_Engine.git");
                 // Aqu� podr�amos abrir el enlace de GitHub
             }
             if (ImGui::MenuItem("Sobre el motor")) {
                 ImGui::OpenPopup("AboutPopup");
+                ImGui::Text("Este motor grafico es propiedad de los estudiantes de la UPC");
             }
             ImGui::EndMenu();
         }
@@ -369,6 +371,17 @@ void MyWindow::draw() {
                 ImGui::Text("Texture ID: None");
             }
 
+            if (selectedObject->texture->getHeight() && selectedObject->texture->getWidth())
+            {
+				GLuint GetHeight = selectedObject->texture->getHeight();
+				GLuint GetWidth = selectedObject->texture->getWidth();
+                ImGui::Text("Texture Shape: %u x %u", GetHeight, GetWidth);
+            }
+            else
+            {
+				ImGui::Text("Texture Shape: None");
+            }
+            ImGui::Text("Texture path: %s", selectedObject->texture->getPath().c_str());
             // Mostrar la informacion de la malla
             if (selectedObject->getMesh()) {
                 const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();

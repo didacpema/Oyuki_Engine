@@ -53,6 +53,7 @@ public:
     bool processEvents(IEventProcessor* event_processor = nullptr);
     void draw();
     void swapBuffers() const;
+    
 
     void logMessage(const std::string& message);  // Método para agregar mensajes al LOG
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG

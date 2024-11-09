@@ -16,7 +16,7 @@ public:
     void setTexture(Texture* newTexture);
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
-
+    
     std::vector<GameObject*> gameObjects;
     std::vector<std::string> gameObjectNames;
 
