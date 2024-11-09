@@ -41,8 +41,11 @@ void handleFileDrop(const char* filePath) {
             scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices(), fileName);
 
             // Asigna la textura checker independientemente de si el modelo tiene una textura propia
-            GLuint checkerTexture = importer.createCheckerTexture();
-            scene.setCheckerTexture(checkerTexture);
+            if (scene.checkerTextureID == 0)
+            {
+                scene.checkerTextureID = importer.createCheckerTexture();
+            }
+            scene.setCheckerTexture(scene.checkerTextureID);
         }
     }
     else if (extension == "png" || extension == "jpg") {

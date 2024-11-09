@@ -22,6 +22,7 @@ ImGuiIO* g_io = nullptr;
 float x = Renderer::eyeX;
 float y = Renderer::eyeY;
 float z = Renderer::eyeZ;
+bool chekerOn = false;
 
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta l�nea al principio del constructor
@@ -182,7 +183,7 @@ void MyWindow::draw() {
     {
         ImGui::Begin("Config");
         ImGui::Text("Configuracion general del sistema");
-
+		
         // Sección de resolución de pantalla
         ImGui::Text("Resolución de pantalla:");
 
@@ -315,21 +316,39 @@ void MyWindow::draw() {
     if (isInspectorOn)
     {
 
-        // Inspector (vac�o)
+        // Inspector (vacio)
         ImGui::Begin("Inspector");
 
         if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
             GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
 
-            ImGui::Text("Informacion del GameObject seleccionado");
+            ImGui::Text("Texture");
+            // Guardar la textura original solo si aún no lo hemos hecho
+            static Texture* originalTexture = selectedObject->texture;
 
-            // Mostrar y modificar la posici�n
+            if (ImGui::Button("Off")) {
+                if (!chekerOn)
+                {
+                    selectedObject->setTexture(new Texture(scene.checkerTextureID));   // Asignar textura checker
+                }
+                chekerOn = !chekerOn;  // Cambiar estado de checker
+            }
+			ImGui::SameLine();
+			if (ImGui::Button("On")) {
+				if (chekerOn)
+				{
+					selectedObject->setTexture(originalTexture);  // Restaurar la textura original
+				}
+                chekerOn = !chekerOn;  // Cambiar estado de checker
+			}
+
+            // Mostrar y modificar la posicion
             float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
             if (ImGui::InputFloat3("Posicion", position)) {
                 selectedObject->transform.position = { position[0], position[1], position[2] };
             }
 
-            // Mostrar y modificar la rotaci�n
+            // Mostrar y modificar la rotacion
             float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
             if (ImGui::InputFloat3("Rotacion", rotation)) {
                 selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
@@ -350,7 +369,7 @@ void MyWindow::draw() {
                 ImGui::Text("Texture ID: None");
             }
 
-            // Mostrar la informaci�n de la malla
+            // Mostrar la informacion de la malla
             if (selectedObject->getMesh()) {
                 const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
                 const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
