@@ -30,9 +30,15 @@ static const auto FRAME_DT = 1.0s / FPS;
 
 Importer importer;
 Scene scene;
+FileSystemUtils fileSystemUtils;
 
 void handleFileDrop(const char* filePath) {
     std::string fileName = FileSystemUtils::getFileName(filePath);
+
+    size_t dotPos = fileName.find_last_of(".");
+    if (dotPos != std::string::npos) {
+        fileName = fileName.substr(0, dotPos);
+    }
     std::string path(filePath);
     std::string extension = path.substr(path.find_last_of('.') + 1);
 
@@ -49,7 +55,7 @@ void handleFileDrop(const char* filePath) {
         }
     }
     else if (extension == "png" || extension == "jpg") {
-        GLuint texture = importer.loadTexture(filePath);
+        Texture* texture = importer.loadTexture(filePath);
         if (texture != 0) {
             scene.setTexture(texture);
         }
@@ -57,6 +63,9 @@ void handleFileDrop(const char* filePath) {
 }
 
 int main(int argc, char** argv) {
+
+    fileSystemUtils.createRequiredDirectories();
+
     MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
     importer.setWindow(&myWindow);
 
@@ -79,6 +88,9 @@ int main(int argc, char** argv) {
     myWindow.logMessage("OpenGL context initialized.");
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
+    handleFileDrop("Library/Meshes/BakerHouse.fbx");
+    handleFileDrop("Library/Textures/Baker_house.png");
 
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();

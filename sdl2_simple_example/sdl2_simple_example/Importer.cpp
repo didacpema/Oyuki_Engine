@@ -1,4 +1,5 @@
 #include "Importer.h"
+#include "Texture.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -74,7 +75,8 @@ GLuint Importer::createCheckerTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);   
+
 
     return checkerTexture;
 }
@@ -146,30 +148,38 @@ bool Importer::loadFBX(const std::string& filePath) {
     return true;
 }
 
-GLuint Importer::loadTexture(const std::string& texturePath) {
+Texture* Importer::loadTexture(const std::string& texturePath) {
     ILuint imageID;
     ilGenImages(1, &imageID);
     ilBindImage(imageID);
 
-    if (!ilLoadImage((const wchar_t*)texturePath.c_str())) {
+    if (!ilLoadImage((const wchar_t*)texturePath.c_str())) {  // Cambia a ilLoadImage((const wchar_t*)texturePath.c_str()) en Windows si necesitas soporte para rutas UTF-16
         ilDeleteImages(1, &imageID);
         std::cerr << "Failed to load texture from: " << texturePath << std::endl;
-        return 0;  // Return 0 if loading fails
+        return 0;  // Retorna 0 si falla la carga
     }
 
-    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);  // Ensure RGBA format for OpenGL
+    // Convertir la imagen a formato RGBA para OpenGL
+    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+    // Obtener dimensiones
+    int width = ilGetInteger(IL_IMAGE_WIDTH);
+    int height = ilGetInteger(IL_IMAGE_HEIGHT);
+
+    GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Specify texture parameters
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    ilDeleteImages(1, &imageID);  // Clean up DevIL image
-    return textureID;
+    ilDeleteImages(1, &imageID);  // Limpia la imagen DevIL
+
+    // Retorna la textura cargada con ID, path, ancho y alto
+    Texture* texture = new Texture(textureID, texturePath, width, height);
+    return texture;
 }
 
 // Método para obtener la textura cargada o checker

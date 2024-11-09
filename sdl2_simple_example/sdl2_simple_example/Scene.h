@@ -12,8 +12,8 @@ public:
     ~Scene();
     void loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const std::string& name, const Transform& transform = Transform());
     void createSphere(const std::string& name, const Transform& transform = Transform());
-    void createCube(const std::string& name, const Transform& transform = Transform());
-    void setTexture(GLuint textureID);
+    void createCube(const char* filePath);
+    void setTexture(Texture* newTexture);
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
 

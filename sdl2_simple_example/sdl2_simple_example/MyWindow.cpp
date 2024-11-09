@@ -158,10 +158,10 @@ void MyWindow::draw() {
 
         if (ImGui::BeginMenu("GameObject")) {
             if (ImGui::MenuItem("Cube")) {
-                scene.createCube(" Cubo");
+                scene.createCube("Library/Meshes/cube.fbx");
             }
             if (ImGui::MenuItem("Sphere")) {
-                scene.createSphere(" Esfera");
+                scene.createSphere("Sphere");
             }
             ImGui::EndMenu();
         }

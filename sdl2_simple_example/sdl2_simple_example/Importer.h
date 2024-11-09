@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include "glm/glm.hpp"
 #include "MyWindow.h"
+#include "Texture.h"
 
 class Importer {
 public:
@@ -12,8 +13,7 @@ public:
     ~Importer();
 
     bool loadFBX(const std::string& filePath);
-    GLuint loadTexture(const std::string& texturePath);
-
+    Texture* loadTexture(const std::string& texturePath);
     const std::vector<float>& getVertices() const { return vertices; }
     const std::vector<float>& getUVs() const { return uvs; }
     const std::vector<unsigned int>& getIndices() const { return indices; }

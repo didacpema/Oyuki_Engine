@@ -1,5 +1,9 @@
 #include "Scene.h"
+#include "Importer.h"
+#include "FilesystemUtils.h"
 #include <GL/glew.h>
+
+extern Importer importer;
 
 Scene::Scene() {}
 
@@ -20,10 +24,8 @@ void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<
     gameObjectNames.push_back(name);
 }
 
-void Scene::setTexture(GLuint textureID) {
+void Scene::setTexture(Texture* newTexture) {
     if (!gameObjects.empty()) {
-        Texture* newTexture = new Texture(textureID);
-
         GameObject* lastObject = gameObjects.back();
         if (lastObject->getTexture() != nullptr) {
             delete lastObject->getTexture();
@@ -33,7 +35,11 @@ void Scene::setTexture(GLuint textureID) {
 }
 
 void Scene::setCheckerTexture(GLuint checkerTextureID) {
-    setTexture(checkerTextureID);
+    // Creamos una textura temporal con el checkerTextureID, un path vacío y tamaño predeterminado (0,0)
+    Texture* checkerTexture = new Texture(checkerTextureID, "checker_texture_path", 0, 0);
+    
+    // Asignamos esta textura a través de setTexture
+    setTexture(checkerTexture);
 }
 
 void Scene::drawScene() {
@@ -46,26 +52,20 @@ void Scene::drawScene() {
         glPopMatrix();   // Restaurar la matriz previa
     }
 }
-void Scene::createCube(const std::string& name, const Transform& transform) {
-    // Datos básicos del cubo (vértices, UVs, índices)
-    std::vector<float> vertices = {
-        -0.5f, -0.5f, -0.5f,   0.5f, -0.5f, -0.5f,   0.5f,  0.5f, -0.5f,  -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,   0.5f, -0.5f,  0.5f,   0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f
-    };
+void Scene::createCube(const char* filePath) {
+    
+    std::string fileName = "Cube";
 
-    std::vector<float> uvs = {
-        0.0f, 0.0f,   1.0f, 0.0f,   1.0f, 1.0f,   0.0f, 1.0f,
-        0.0f, 0.0f,   1.0f, 0.0f,   1.0f, 1.0f,   0.0f, 1.0f
-    };
+    std::string path(filePath);
+    std::string extension = path.substr(path.find_last_of('.') + 1);
 
-    std::vector<unsigned int> indices = {
-        0, 1, 2,  2, 3, 0,  4, 5, 6,  6, 7, 4,
-        0, 1, 5,  5, 4, 0,  2, 3, 7,  7, 6, 2,
-        0, 3, 7,  7, 4, 0,  1, 2, 6,  6, 5, 1
-    };
+    if (importer.loadFBX(filePath)) {
+        loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices(), fileName);
 
-    loadModelData(vertices, uvs, indices, name, transform); // Añadir el cubo a la escena
+        setCheckerTexture(checkerTextureID);
+    }
 }
+
 void Scene::createSphere(const std::string& name, const Transform& transform) {
     
     const int sectors = 36;  // Divide la esfera en 36 partes (puedes cambiar este número para más resolución)
@@ -116,4 +116,5 @@ void Scene::createSphere(const std::string& name, const Transform& transform) {
         }
     }
     loadModelData(vertices, uvs, indices, name, transform);
+    setCheckerTexture(checkerTextureID);
 }
