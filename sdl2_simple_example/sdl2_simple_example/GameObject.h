@@ -5,18 +5,18 @@
 
 class GameObject {
 public:
-    GameObject(Mesh* mesh, Texture* texture);
+    GameObject(Mesh* mesh, TextureData* texture);
     ~GameObject();
 
     void draw() const;
-    void setTexture(Texture* texture);
+    void setTexture(TextureData* texture);
 
-    Texture* getTexture() const { return texture; }
+    TextureData* getTexture() const { return texture; }
     Mesh* getMesh() const { return mesh; }
 
     void setTransform(const Transform& newTransform);
 
     Mesh* mesh;
-    Texture* texture;
+    TextureData* texture;
     Transform transform;
 };

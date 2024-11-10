@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 
 class FileSystemUtils {
 public:
-    static void createRequiredDirectories() {
+    static void GenerateRequiredDirectories() {
         const std::vector<std::string> dirs = { "Assets", "Library/Meshes", "Library/Materials", "Library/Models" };
         for (const auto& dir : dirs) {
             if (!fs::exists(dir)) {

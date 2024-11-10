@@ -13,7 +13,7 @@ public:
     void loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const std::string& name, const Transform& transform = Transform());
     void createSphere(const std::string& name, const Transform& transform = Transform());
     void createCube(const char* filePath);
-    void setTexture(Texture* newTexture);
+    void setTexture(TextureData* newTexture);
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
     

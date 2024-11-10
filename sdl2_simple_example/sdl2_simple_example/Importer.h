@@ -13,13 +13,13 @@ public:
     ~Importer();
 
     bool loadFBX(const std::string& filePath);
-    Texture* loadTexture(const std::string& texturePath);
+    TextureData* loadTexture(const std::string& texturePath);
     const std::vector<float>& getVertices() const { return vertices; }
     const std::vector<float>& getUVs() const { return uvs; }
     const std::vector<unsigned int>& getIndices() const { return indices; }
     GLuint getTextureID() { return textureID; }
 
-    GLuint createCheckerTexture();
+    GLuint GenerateCheckerTexture();
     GLuint getTextureID() const;
 
     void setWindow(MyWindow* window);

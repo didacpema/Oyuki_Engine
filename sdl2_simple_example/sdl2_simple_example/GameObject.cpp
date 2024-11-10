@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-GameObject::GameObject(Mesh* mesh, Texture* texture)
+GameObject::GameObject(Mesh* mesh, TextureData* texture)
     : mesh(mesh), texture(texture) {}
 
 GameObject::~GameObject() {
@@ -10,7 +10,7 @@ GameObject::~GameObject() {
     if (texture) delete texture;
 }
 
-void GameObject::setTexture(Texture* newTexture) {
+void GameObject::setTexture(TextureData* newTexture) {
     texture = newTexture;
 }
 

@@ -49,13 +49,13 @@ void handleFileDrop(const char* filePath) {
             // Asigna la textura checker independientemente de si el modelo tiene una textura propia
             if (scene.checkerTextureID == 0)
             {
-                scene.checkerTextureID = importer.createCheckerTexture();
+                scene.checkerTextureID = importer.GenerateCheckerTexture();
             }
             scene.setCheckerTexture(scene.checkerTextureID);
         }
     }
     else if (extension == "png" || extension == "jpg") {
-        Texture* texture = importer.loadTexture(filePath);
+        TextureData* texture = importer.loadTexture(filePath);
         if (texture != 0) {
             scene.setTexture(texture);
         }
@@ -64,7 +64,7 @@ void handleFileDrop(const char* filePath) {
 
 int main(int argc, char** argv) {
 
-    fileSystemUtils.createRequiredDirectories();
+    fileSystemUtils.GenerateRequiredDirectories();
 
     MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
     importer.setWindow(&myWindow);
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
         Renderer::setupView(myWindow.cameraDistance, myWindow.cameraAngleX, myWindow.cameraAngleY, myWindow.panX, myWindow.panY);
 
-        Renderer::drawGrid(10.0f);  // Draw grid first
+        Renderer::deployGrid(10.0f);  // Draw grid first
 
         scene.drawScene();         // Draw objects in the scene
 

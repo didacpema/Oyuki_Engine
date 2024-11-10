@@ -24,7 +24,7 @@ void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<
     gameObjectNames.push_back(name);
 }
 
-void Scene::setTexture(Texture* newTexture) {
+void Scene::setTexture(TextureData* newTexture) {
     if (!gameObjects.empty()) {
         GameObject* lastObject = gameObjects.back();
         if (lastObject->getTexture() != nullptr) {
@@ -36,7 +36,7 @@ void Scene::setTexture(Texture* newTexture) {
 
 void Scene::setCheckerTexture(GLuint checkerTextureID) {
     // Creamos una textura temporal con el checkerTextureID, un path vacío y tamaño predeterminado (0,0)
-    Texture* checkerTexture = new Texture(checkerTextureID, "checker_texture_path", 0, 0);
+    TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
     
     // Asignamos esta textura a través de setTexture
     setTexture(checkerTexture);

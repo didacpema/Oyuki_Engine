@@ -25,7 +25,7 @@ void Renderer::initOpenGL(ivec2 WINDOW_SIZE) {
     Renderer::_WINDOW_SIZE = WINDOW_SIZE;
 }
 
-void Renderer::drawGrid(float spacing) {
+void Renderer::deployGrid(float spacing) {
     glDisable(GL_TEXTURE_2D);  // Disable texture for the grid lines
     float gridRange = 1000.0f;
 

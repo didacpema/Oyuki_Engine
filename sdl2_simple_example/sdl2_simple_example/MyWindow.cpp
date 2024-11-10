@@ -326,12 +326,12 @@ void MyWindow::draw() {
 
             ImGui::Text("Texture");
             // Guardar la textura original solo si aún no lo hemos hecho
-            static Texture* originalTexture = selectedObject->texture;
+            static TextureData* originalTexture = selectedObject->texture;
 
             if (ImGui::Button("Off")) {
                 if (!chekerOn)
                 {
-                    selectedObject->setTexture(new Texture(scene.checkerTextureID));   // Asignar textura checker
+                    selectedObject->setTexture(new TextureData(scene.checkerTextureID));   // Asignar textura checker
                 }
                 chekerOn = !chekerOn;  // Cambiar estado de checker
             }

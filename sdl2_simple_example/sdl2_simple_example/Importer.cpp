@@ -52,7 +52,7 @@ void centerModel(const aiScene* scene) {
 }
 
 // Dentro de la clase Importer, agrega un método para crear una textura checker
-GLuint Importer::createCheckerTexture() {
+GLuint Importer::GenerateCheckerTexture() {
     const int width = 64;
     const int height = 64;
     std::vector<GLubyte> checkerImage(width * height * 4);
@@ -148,7 +148,7 @@ bool Importer::loadFBX(const std::string& filePath) {
     return true;
 }
 
-Texture* Importer::loadTexture(const std::string& texturePath) {
+TextureData* Importer::loadTexture(const std::string& texturePath) {
     ILuint imageID;
     ilGenImages(1, &imageID);
     ilBindImage(imageID);
@@ -178,7 +178,7 @@ Texture* Importer::loadTexture(const std::string& texturePath) {
     ilDeleteImages(1, &imageID);  // Limpia la imagen DevIL
 
     // Retorna la textura cargada con ID, path, ancho y alto
-    Texture* texture = new Texture(textureID, texturePath, width, height);
+    TextureData* texture = new TextureData(textureID, texturePath, width, height);
     return texture;
 }
 

@@ -2,14 +2,14 @@
 #include <GL/glew.h>
 #include <string>
 
-class Texture {
+class TextureData {
 public:
     GLuint id;
     std::string path;
     int width;
     int height;
 
-    Texture(GLuint textureId = 0, const std::string& filePath = "", int texWidth = 0, int texHeight = 0)
+    TextureData(GLuint textureId = 0, const std::string& filePath = "", int texWidth = 0, int texHeight = 0)
         : id(textureId), path(filePath), width(texWidth), height(texHeight) {}
 
     void bind() const;

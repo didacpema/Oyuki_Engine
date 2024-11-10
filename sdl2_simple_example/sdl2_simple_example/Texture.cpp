@@ -1,9 +1,9 @@
 #include "Texture.h"
 
-void Texture::bind() const {
+void TextureData::bind() const {
     glBindTexture(GL_TEXTURE_2D, id);
 }
 
-void Texture::unbind() const {
+void TextureData::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
