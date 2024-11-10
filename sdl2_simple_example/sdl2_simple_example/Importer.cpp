@@ -32,23 +32,25 @@ void Importer::setWindow(MyWindow* window) {
 }
 
 void centerModel(const aiScene* scene) {
-    aiVector3D min, max;
-    min = max = scene->mMeshes[0]->mVertices[0];
+    if (scene->mNumMeshes == 0) return;
+
+    aiVector3D minimo(FLT_MAX, FLT_MAX, FLT_MAX);
+    aiVector3D maximo(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         for (unsigned int v = 0; v < scene->mMeshes[i]->mNumVertices; v++) {
             aiVector3D vertex = scene->mMeshes[i]->mVertices[v];
-            min.x = min(min.x, vertex.x);
-            min.y = min(min.y, vertex.y);
-            min.z = min(min.z, vertex.z);
-            max.x = max(max.x, vertex.x);
-            max.y = max(max.y, vertex.y);
-            max.z = max(max.z, vertex.z);
+            minimo.x = min(minimo.x, vertex.x);
+            minimo.y = min(minimo.y, vertex.y);
+            minimo.z = min(minimo.z, vertex.z);
+            maximo.x = max(maximo.x, vertex.x);
+            maximo.y = max(maximo.y, vertex.y);
+            maximo.z = max(maximo.z, vertex.z);
         }
     }
-    modelCenter = vec3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
-    modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
-    //modelScale = 2.0f / glm::length(vec3(max.x - min.x, max.y - min.y, max.z - min.z));
+
+    modelCenter = vec3((minimo.x + maximo.x) / 2, (minimo.y + maximo.y) / 2, (minimo.z + maximo.z) / 2);
+    modelScale = 2.0f / glm::length(vec3(maximo.x - minimo.x, maximo.y - minimo.y, maximo.z - minimo.z));
 }
 
 // Dentro de la clase Importer, agrega un método para crear una textura checker
@@ -82,7 +84,7 @@ GLuint Importer::GenerateCheckerTexture() {
 }
 
 bool Importer::loadFBX(const std::string& filePath) {
-    _window->logMessage("Attempting to load FBX file: " + filePath);  // New log message
+    _window->logMessage("Attempting to load FBX file: " + filePath);  // Log de carga
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
@@ -93,24 +95,26 @@ bool Importer::loadFBX(const std::string& filePath) {
     }
 
     _window->logMessage("Successfully loaded FBX file: " + filePath);
+    _window->logMessage("Total meshes in scene: " + std::to_string(scene->mNumMeshes));
 
-    // Centering the model and logging its details
+    // Centrado y escalado del modelo
     centerModel(scene);
-    _window->logMessage("Model centered with scale factor: " + std::to_string(modelScale) + ", center: (" +
-        std::to_string(modelCenter.x) + ", " +
-        std::to_string(modelCenter.y) + ", " +
-        std::to_string(modelCenter.z) + ")");
 
+    // Limpiar los contenedores para evitar que se mezclen datos de diferentes cargas
     vertices.clear();
     uvs.clear();
     indices.clear();
 
+    // Procesar cada malla en el archivo FBX
     for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[i];
         _window->logMessage("Processing mesh: " + std::to_string(i) + " with " +
             std::to_string(mesh->mNumVertices) + " vertices and " +
             std::to_string(mesh->mNumFaces) + " faces.");
 
+        unsigned int baseVertex = vertices.size() / 3; // Offset para los índices de cada malla
+
+        // Añadir vértices y coordenadas UV de la malla actual
         for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
             aiVector3D vertex = mesh->mVertices[v];
             vertices.push_back(vertex.x);
@@ -127,23 +131,15 @@ bool Importer::loadFBX(const std::string& filePath) {
                 uvs.push_back(0.0f);
             }
         }
+
+        // Añadir índices de la malla actual
         for (unsigned int f = 0; f < mesh->mNumFaces; f++) {
             aiFace face = mesh->mFaces[f];
             for (unsigned int j = 0; j < face.mNumIndices; j++) {
-                indices.push_back(face.mIndices[j]);
+                indices.push_back(baseVertex + face.mIndices[j]); // Ajuste para índice base
             }
         }
     }
-
-    /*
-    if (scene->mNumMaterials == 0) {
-        textureID = createCheckerTexture();
-        _window->logMessage("No texture found in model. Checker texture applied.");
-    }
-    else {
-        _window->logMessage("Texture detected and applied.");
-    }
-    */
 
     return true;
 }
