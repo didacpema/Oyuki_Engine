@@ -1,7 +1,15 @@
 #pragma once
+
+
+#include "Renderer.h"
+#include "Scene.h"
+
 #include <glm/glm.hpp>
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_opengl.h>
+
 
 
 #include <string>
@@ -28,6 +36,7 @@ public:
     float cameraAngleX = 0.0f; // Ángulo de rotación en el eje X
     float cameraAngleY = 0.0f; // Ángulo de rotación en el eje Y
     float panX = 0.0f, panY = 0.0f; // Desplazamiento de la cámara (pan)
+    bool isSceneOn = true;
     bool isConsolaOn = true;
     bool isConfigOn = true;
     bool isJerarquiaOn = true;
@@ -53,7 +62,11 @@ public:
     bool processEvents(IEventProcessor* event_processor = nullptr);
     void draw();
     void swapBuffers() const;
-    
+
+    void setupFramebuffer();
+    void renderToFramebuffer();
+
+    GLuint getFramebufferTexture() const { return textureColorbuffer; }
 
     void logMessage(const std::string& message);  // Método para agregar mensajes al LOG
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG
@@ -61,6 +74,8 @@ public:
     glm::ivec2 selectedResolution;
 
     bool isFullscreen = false;
+
+    GLuint framebuffer, textureColorbuffer, rbo;
 
 };
 

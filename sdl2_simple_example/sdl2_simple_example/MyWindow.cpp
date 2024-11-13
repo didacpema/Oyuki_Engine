@@ -1,11 +1,7 @@
-#include "Renderer.h"
-#include "Scene.h"
-#include <exception>
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL.h>
+
 #include "MyWindow.h"
+#include <exception>
+
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -104,6 +100,39 @@ void MyWindow::close() {
     logMessage("Ventana cerrada.");
 }
 
+void MyWindow::setupFramebuffer() {
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // Crear la textura a la que renderizar
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    // Crear el renderbuffer para almacenar el buffer de profundidad
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Desenlazar el framebuffer
+}
+
+void MyWindow::renderToFramebuffer() {
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpiar los buffers
+
+    // Configurar y dibujar la escena
+    renderer.setupView(5.0f, 0.5f, 0.5f, 0.0f, 0.0f); // Parámetros de la cámara
+    renderer.deployGrid(1.0f); // Renderizar una cuadrícula en la escena
+    scene.drawScene(); // Aquí debería dibujar toda la escena
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Desenlazar el framebuffer
+}
+
 void MyWindow::draw() {
 
     Uint32 currentTime = SDL_GetTicks();
@@ -170,7 +199,7 @@ void MyWindow::draw() {
         ImGui::EndMainMenuBar();
     }
     //COMENTA ESTA LINEA PARA SER FELIZ
-    //ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
 
     if (isConsolaOn)
     {
@@ -314,6 +343,16 @@ void MyWindow::draw() {
         logMessage("Cámara ajustada al objeto seleccionado.");
     }
 
+    if (isSceneOn) {
+        renderToFramebuffer();  // Renderizar la escena en el framebuffer
+
+        ImGui::Begin("Scene");
+
+        GLuint textureID = textureColorbuffer; // Usamos la textura del framebuffer
+        ImGui::Image((void*)(intptr_t)textureID, ImVec2(Renderer::_WINDOW_SIZE.x, Renderer::_WINDOW_SIZE.y));
+
+        ImGui::End();
+    }
 
     if (isInspectorOn)
     {
