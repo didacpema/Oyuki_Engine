@@ -25,10 +25,12 @@ static const auto FRAME_DT = 1.0s / FPS;
 
 Importer importer;
 Scene scene;
+MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
 
 void handleFileDrop(const char* filePath) {
     std::string fileName = FileSystemUtils::getFileName(filePath);
 
+    // Procesar extensiones
     size_t dotPos = fileName.find_last_of(".");
     if (dotPos != std::string::npos) {
         fileName = fileName.substr(0, dotPos);
@@ -40,9 +42,8 @@ void handleFileDrop(const char* filePath) {
         if (importer.loadFBX(filePath)) {
             scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices(), fileName);
 
-            // Asigna la textura checker independientemente de si el modelo tiene una textura propia
-            if (scene.checkerTextureID == 0)
-            {
+            // Configurar textura checker si no está asignada
+            if (scene.checkerTextureID == 0) {
                 scene.checkerTextureID = importer.GenerateCheckerTexture();
             }
             scene.setCheckerTexture(scene.checkerTextureID);
@@ -50,17 +51,19 @@ void handleFileDrop(const char* filePath) {
     }
     else if (extension == "png" || extension == "jpg") {
         TextureData* texture = importer.loadTexture(filePath);
-        if (texture != 0) {
+        if (texture != nullptr) {
             scene.setTexture(texture);
         }
     }
+
+    // Actualizar el contenido del directorio en la interfaz
+    myWindow.UpdateDirectoryContents();
 }
 
 int main(int argc, char** argv) {
 
     FileSystemUtils::GenerateRequiredDirectories();
     
-    MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
     myWindow.UpdateDirectoryContents(); // Cargar contenido inicial
     importer.setWindow(&myWindow);
 
