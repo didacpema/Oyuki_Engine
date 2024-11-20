@@ -8,7 +8,7 @@
 #include "MemoryUsage.h"
 #include <cmath>
 #include <algorithm>
-
+#include "FilesystemUtils.h"
 
 using namespace std;
 extern Scene scene;
@@ -19,6 +19,10 @@ float x = Renderer::eyeX;
 float y = Renderer::eyeY;
 float z = Renderer::eyeZ;
 bool chekerOn = false;
+
+
+std::string currentDirectory = "Library/Meshes";
+std::vector<std::string> directoryContents;
 
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta l�nea al principio del constructor
@@ -65,6 +69,10 @@ MyWindow::~MyWindow() {
 
 void MyWindow::logMessage(const std::string& message) {
     logMessages.push_back(message);
+}
+
+void MyWindow::UpdateDirectoryContents() {
+    directoryContents = FileSystemUtils::ListDirectory(currentDirectory);
 }
 
 void MyWindow::open(const char* title, unsigned short width, unsigned short height) {
@@ -475,7 +483,33 @@ void MyWindow::draw() {
         ImGui::EndPopup();
     }
 
+    ImGui::Begin("File Explorer");
 
+    // Mostrar directorio actual
+    ImGui::Text("Current Directory: %s", currentDirectory.c_str());
+
+    // Botón para volver al directorio padre
+    if (ImGui::Button(".. (Go Up)")) {
+        currentDirectory = fs::path(currentDirectory).parent_path().string();
+        UpdateDirectoryContents();
+    }
+
+    // Mostrar los archivos y carpetas
+    for (const auto& entry : directoryContents) {
+        if (fs::is_directory(entry)) {
+            // Mostrar carpetas
+            if (ImGui::Button((FileSystemUtils::getFileName(entry) + "/").c_str())) {
+                currentDirectory = entry;
+                UpdateDirectoryContents();
+            }
+        }
+        else {
+            // Mostrar archivos
+            ImGui::Text("%s", FileSystemUtils::getFileName(entry).c_str());
+        }
+    }
+
+    ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -499,20 +533,19 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         // Enviar el evento a ImGui primero
         ImGui_ImplSDL2_ProcessEvent(&e);
 
-        // Procesa el evento de archivo arrastrado y soltado
-        if (e.type == SDL_DROPFILE) {
-            char* droppedFile = e.drop.file;
-            logMessage("Archivo arrastrado: " + string(droppedFile));
-            handleFileDrop(droppedFile); // Tu función para manejar archivos
-            SDL_free(droppedFile);
-            continue;
-        }
-
         if (event_processor) {
             event_processor->processEvent(e);  // Procesar eventos personalizados
         }
 
-        switch (e.type) {
+        switch (e.type) 
+        {
+        case SDL_DROPFILE: {
+            char* droppedFile = e.drop.file;
+            logMessage("Archivo arrastrado: " + string(droppedFile));
+            handleFileDrop(droppedFile); // Tu función para manejar archivos
+            SDL_free(droppedFile);
+            break;
+        }
         case SDL_QUIT:
             logMessage("Evento de salida recibido.");
             close();

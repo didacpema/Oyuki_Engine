@@ -25,7 +25,6 @@ static const auto FRAME_DT = 1.0s / FPS;
 
 Importer importer;
 Scene scene;
-FileSystemUtils fileSystemUtils;
 
 void handleFileDrop(const char* filePath) {
     std::string fileName = FileSystemUtils::getFileName(filePath);
@@ -59,9 +58,10 @@ void handleFileDrop(const char* filePath) {
 
 int main(int argc, char** argv) {
 
-    fileSystemUtils.GenerateRequiredDirectories();
-
+    FileSystemUtils::GenerateRequiredDirectories();
+    
     MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
+    myWindow.UpdateDirectoryContents(); // Cargar contenido inicial
     importer.setWindow(&myWindow);
 
     myWindow.logMessage("Initializing SDL...");
