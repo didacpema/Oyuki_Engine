@@ -1,3 +1,7 @@
+
+
+#define SDL_MAIN_HANDLED
+
 #include <GL/glew.h>
 #include <chrono>
 #include <thread>
@@ -10,15 +14,6 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
-#include <string>
-#include <vector>
-
-#define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_main.h>
-
-#include "Scene.h"
-#include "Renderer.h"
 
 using namespace std;
 using hrclock = chrono::high_resolution_clock;
@@ -94,14 +89,9 @@ int main(int argc, char** argv) {
 
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear color and depth buffers
-
-        Renderer::setupView(myWindow.cameraDistance, myWindow.cameraAngleX, myWindow.cameraAngleY, myWindow.panX, myWindow.panY);
-
-        Renderer::deployGrid(10.0f);  // Draw grid first
-
-        scene.drawScene();         // Draw objects in the scene
+        
+        myWindow.setupFramebuffer();
+        myWindow.renderToFramebuffer();
 
         myWindow.draw();
         myWindow.swapBuffers();

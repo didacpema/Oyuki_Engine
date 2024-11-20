@@ -43,13 +43,14 @@ void Scene::setCheckerTexture(GLuint checkerTextureID) {
 }
 
 void Scene::drawScene() {
-
-    for (const auto& obj : gameObjects) {
-        glPushMatrix();  // Guardar la matriz actual
-
-        obj->draw();  // Dibujar el objeto
-
-        glPopMatrix();   // Restaurar la matriz previa
+    for (auto* obj : gameObjects) {
+        if (obj->getTexture() == nullptr) {
+            if (checkerTextureID != 0) {
+                TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
+                obj->setTexture(checkerTexture);
+            }
+        }
+        obj->draw();
     }
 }
 void Scene::createCube(const char* filePath) {

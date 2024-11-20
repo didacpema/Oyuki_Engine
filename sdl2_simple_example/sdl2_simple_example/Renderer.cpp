@@ -64,7 +64,7 @@ void Renderer::setupView(float cameraDistance, float cameraAngleX, float cameraA
     eyeY = cameraDistance * sin(cameraAngleX) + panY;
     eyeZ = cameraDistance * cos(cameraAngleY) * cos(cameraAngleX);
 
-    gluLookAt(eyeX, eyeY, eyeZ, panX, panY, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(eyeX, eyeY, eyeZ, panX, panY, 0.0, 0.0, -1.0, 0.0);
 }
 
 void Renderer::applyProjectionAndViewport(ivec2 selectedResolution) {

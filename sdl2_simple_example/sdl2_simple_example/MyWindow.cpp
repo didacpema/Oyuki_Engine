@@ -104,7 +104,6 @@ void MyWindow::setupFramebuffer() {
     glGenFramebuffers(1, &framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-    // Crear la textura a la que renderizar
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -112,25 +111,34 @@ void MyWindow::setupFramebuffer() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
-    // Crear el renderbuffer para almacenar el buffer de profundidad
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Desenlazar el framebuffer
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        logMessage("Framebuffer no está completo.");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void MyWindow::renderToFramebuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpiar los buffers
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Configurar y dibujar la escena
-    renderer.setupView(5.0f, 0.5f, 0.5f, 0.0f, 0.0f); // Parámetros de la cámara
-    renderer.deployGrid(1.0f); // Renderizar una cuadrícula en la escena
-    scene.drawScene(); // Aquí debería dibujar toda la escena
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        logMessage("Framebuffer no está completo.");
+        return;
+    }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Desenlazar el framebuffer
+    renderer.setupView(cameraDistance, cameraAngleX, cameraAngleY, panX, panY);
+
+    renderer.deployGrid(10.0f);  // Draw grid first
+
+    scene.drawScene();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void MyWindow::draw() {
@@ -344,13 +352,11 @@ void MyWindow::draw() {
     }
 
     if (isSceneOn) {
-        renderToFramebuffer();  // Renderizar la escena en el framebuffer
-
+        renderToFramebuffer();  // Renderiza la escena al framebuffer
         ImGui::Begin("Scene");
-
-        GLuint textureID = textureColorbuffer; // Usamos la textura del framebuffer
-        ImGui::Image((void*)(intptr_t)textureID, ImVec2(Renderer::_WINDOW_SIZE.x, Renderer::_WINDOW_SIZE.y));
-
+        if (textureColorbuffer) {
+            ImGui::Image((void*)(intptr_t)textureColorbuffer, ImVec2(renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y));
+        }
         ImGui::End();
     }
 
