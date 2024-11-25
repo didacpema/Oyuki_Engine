@@ -6,9 +6,9 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 #include "MemoryUsage.h"
-#include <cmath>
 #include <algorithm>
 #include "FilesystemUtils.h"
+#include "Consola.h"
 
 using namespace std;
 extern Scene scene;
@@ -229,11 +229,7 @@ void MyWindow::draw() {
 
     if (isConsolaOn)
     {
-        ImGui::Begin("Consola");
-        for (const auto& msg : logMessages) {
-            ImGui::Text("%s", msg.c_str());
-        }
-        ImGui::End();
+        Consola::draw(logMessages);
     }
 
     if (isConfigOn)

@@ -128,6 +128,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Consola.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -138,7 +140,9 @@
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="CustomFormatUtils.h" />
+    <ClInclude Include="Consola.h" />
     <ClInclude Include="FilesystemUtils.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Importer.h" />
