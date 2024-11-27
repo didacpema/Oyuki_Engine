@@ -1,11 +1,10 @@
 #include "Config.h"
-#include "MyWindow.h"
 
 
-Config::Config() {}
+Config::Config(MyWindow* window) : _myWindow(window) {}
 Config::~Config() {}
 
-void Config::draw(SDL_Window* _window) {
+void Config::draw(SDL_Window* _window, Renderer renderer, float fps) {
     ImGui::Begin("Config");
     ImGui::Text("Configuracion general del sistema");
 
@@ -49,11 +48,11 @@ void Config::draw(SDL_Window* _window) {
     if (ImGui::Checkbox("Pantalla completa", &isFullscreen)) {
         if (isFullscreen) {
             SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-            logMessage("Pantalla completa activada.");
+            _myWindow->logMessage("Pantalla completa activada.");
         }
         else {
             SDL_SetWindowFullscreen(_window, 0);  // 0 means windowed mode
-            logMessage("Pantalla completa desactivada.");
+            _myWindow->logMessage("Pantalla completa desactivada.");
         }
 
         // Get the current window size dynamically after changing fullscreen mode

@@ -77,7 +77,6 @@ public:
     bool isFullscreen = false;
 
     GLuint framebuffer, textureColorbuffer, rbo;
-
 };
 
 extern void handleFileDrop(const char* filePath);

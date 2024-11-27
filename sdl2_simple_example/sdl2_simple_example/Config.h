@@ -5,15 +5,20 @@
 #include <string>
 #include <vector>
 #include <imgui.h>
+#include "MyWindow.h"
+#include "MemoryUsage.h"
+
 
 class Config {
 public:
-	Config();
+	Config(MyWindow* window);
 	~Config();
 
-	void draw(SDL_Window* _window);
-	glm::ivec2 selectedResolution;
+	void draw(SDL_Window* _window, Renderer renderer, float fps);
 private:
+	MyWindow* _myWindow;
+	glm::ivec2 selectedResolution;
+	bool isFullscreen = false;
 };
 
 
