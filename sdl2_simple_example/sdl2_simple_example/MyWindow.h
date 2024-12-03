@@ -72,8 +72,6 @@ public:
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG
     void UpdateDirectoryContents();
 
-    glm::ivec2 selectedResolution;
-
     bool isFullscreen = false;
 
     GLuint framebuffer, textureColorbuffer, rbo;

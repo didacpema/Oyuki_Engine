@@ -48,6 +48,15 @@
     <ClCompile Include="Config.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
+    <ClCompile Include="Jerarquia.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Escena.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyWindow.h">
@@ -87,6 +96,15 @@
       <Filter>Windows</Filter>
     </ClInclude>
     <ClInclude Include="Config.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Jerarquia.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Escena.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector.h">
       <Filter>Windows</Filter>
     </ClInclude>
   </ItemGroup>
