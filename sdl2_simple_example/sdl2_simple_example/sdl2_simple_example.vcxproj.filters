@@ -30,9 +30,6 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,6 +52,12 @@
       <Filter>Windows</Filter>
     </ClCompile>
     <ClCompile Include="Inspector.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileExplorer.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,6 +108,9 @@
       <Filter>Windows</Filter>
     </ClInclude>
     <ClInclude Include="Inspector.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="FileExplorer.h">
       <Filter>Windows</Filter>
     </ClInclude>
   </ItemGroup>

@@ -131,6 +131,7 @@
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Consola.cpp" />
     <ClCompile Include="Escena.cpp" />
+    <ClCompile Include="FileExplorer.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Inspector.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="CustomFormatUtils.h" />
     <ClInclude Include="Consola.h" />
     <ClInclude Include="Escena.h" />
+    <ClInclude Include="FileExplorer.h" />
     <ClInclude Include="FilesystemUtils.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Importer.h" />

@@ -14,6 +14,7 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
+#include "FileExplorer.h"
 
 using namespace std;
 using hrclock = chrono::high_resolution_clock;
@@ -26,6 +27,7 @@ static const auto FRAME_DT = 1.0s / FPS;
 Importer importer;
 Scene scene;
 MyWindow myWindow("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
+extern Explorer explorer;
 
 void handleFileDrop(const char* filePath) {
     std::string fileName = FileSystemUtils::getFileName(filePath);
@@ -57,14 +59,14 @@ void handleFileDrop(const char* filePath) {
     }
 
     // Actualizar el contenido del directorio en la interfaz
-    myWindow.UpdateDirectoryContents();
+    explorer.UpdateDirectoryContents();
 }
 
 int main(int argc, char** argv) {
 
     FileSystemUtils::GenerateRequiredDirectories();
     
-    myWindow.UpdateDirectoryContents(); // Cargar contenido inicial
+    explorer.UpdateDirectoryContents(); // Cargar contenido inicial
     importer.setWindow(&myWindow);
 
     myWindow.logMessage("Initializing SDL...");
