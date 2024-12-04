@@ -84,6 +84,8 @@ int main(int argc, char** argv) {
     Renderer::initOpenGL(WINDOW_SIZE);
     Renderer::setupProjection(45.0f, 1.0f, 0.1f, 1000.0f);
     myWindow.logMessage("OpenGL context initialized.");
+    myWindow.setupFramebuffer();
+    myWindow.renderToFramebuffer();
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
@@ -93,8 +95,7 @@ int main(int argc, char** argv) {
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
         
-        myWindow.setupFramebuffer();
-        myWindow.renderToFramebuffer();
+        
 
         myWindow.draw();
         myWindow.swapBuffers();

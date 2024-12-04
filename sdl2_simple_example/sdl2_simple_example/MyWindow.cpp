@@ -60,9 +60,17 @@ MyWindow::MyWindow(const char* title, unsigned short width, unsigned short heigh
 }
 
 MyWindow::~MyWindow() {
+    // Limpieza de ImGui
     ImGui_ImplSDL2_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
+
+    // Liberar recursos OpenGL
+    glDeleteFramebuffers(1, &framebuffer);
+    glDeleteTextures(1, &textureColorbuffer);
+    glDeleteRenderbuffers(1, &rbo);
+
+    // Cerrar ventana y SDL
     close();
     SDL_Quit();
 }
