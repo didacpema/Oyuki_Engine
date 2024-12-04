@@ -22,10 +22,8 @@ void Explorer::UpdateDirectoryContents() {
 void Explorer::draw() {
     ImGui::Begin("File Explorer");
 
-    // Mostrar directorio actual
     ImGui::Text("Current Directory: %s", currentDirectory.c_str());
 
-    // Botón para navegar al directorio padre
     if (ImGui::Button(".. (Go Up)")) {
         try {
             fs::path parent = fs::path(currentDirectory).parent_path();
@@ -42,32 +40,32 @@ void Explorer::draw() {
         }
     }
 
-    // Listar contenido del directorio
     for (const auto& entryPath : directoryContents) {
         try {
-            fs::path entry(entryPath); // Convertir a fs::path
+            fs::path entry(entryPath);
 
-            // Si es un directorio, mostrarlo como botón
             if (fs::is_directory(entry)) {
                 if (ImGui::Button(FileSystemUtils::getFileName(entry.string()).c_str())) {
                     currentDirectory = entry.string();
                     UpdateDirectoryContents();
                 }
             }
-            // Si es un archivo, permitir interacción
             else {
                 ImGui::Text("%s", FileSystemUtils::getFileName(entry.string()).c_str());
 
-                // Permitir arrastrar archivos hacia la escena
-                if (ImGui::IsItemClicked()) {
-                    handleFileDrop(entry.string().c_str());
+                // Drag & Drop: iniciar un drag si el archivo es válido
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+                    ImGui::SetDragDropPayload("FILE_PATH", entry.string().c_str(), entry.string().size() + 1);
+                    ImGui::Text("Dragging %s", FileSystemUtils::getFileName(entry.string()).c_str());
+                    ImGui::EndDragDropSource();
                 }
             }
         }
         catch (const fs::filesystem_error& e) {
-            ImGui::Text("Error: %s", e.what()); // Mostrar errores específicos por entrada
+            ImGui::Text("Error: %s", e.what());
         }
     }
 
     ImGui::End();
 }
+
