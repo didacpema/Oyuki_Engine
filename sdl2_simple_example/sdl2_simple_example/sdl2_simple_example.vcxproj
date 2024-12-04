@@ -128,8 +128,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Consola.cpp" />
+    <ClCompile Include="Escena.cpp" />
+    <ClCompile Include="FileExplorer.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Importer.cpp" />
+    <ClCompile Include="Inspector.cpp" />
+    <ClCompile Include="Jerarquia.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MyWindow.cpp" />
@@ -138,10 +144,16 @@
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="CustomFormatUtils.h" />
+    <ClInclude Include="Consola.h" />
+    <ClInclude Include="Escena.h" />
+    <ClInclude Include="FileExplorer.h" />
     <ClInclude Include="FilesystemUtils.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="Inspector.h" />
+    <ClInclude Include="Jerarquia.h" />
     <ClInclude Include="MemoryUsage.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MyWindow.h" />

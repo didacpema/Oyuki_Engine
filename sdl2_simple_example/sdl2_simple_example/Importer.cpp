@@ -8,7 +8,7 @@
 #include <IL/ilut.h>
 #include <iostream>
 #include <fstream>
-#include "MyWindow.h"
+#include <algorithm>
 
 using vec3 = glm::dvec3;
 

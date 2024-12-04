@@ -5,29 +5,31 @@
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
-#include "MemoryUsage.h"
-#include <cmath>
 #include <algorithm>
-#include "FilesystemUtils.h"
+
+#include "Consola.h"
+#include "Config.h"
+#include "Jerarquia.h"
+#include "Escena.h"
+#include "Inspector.h"
+#include "FileExplorer.h"
 
 using namespace std;
 extern Scene scene;
 Renderer renderer;
 ImGuiIO* g_io = nullptr;
+Inspector inspector;
+Explorer explorer;
 
 float x = Renderer::eyeX;
 float y = Renderer::eyeY;
 float z = Renderer::eyeZ;
 bool chekerOn = false;
 
-
-std::string currentDirectory = "Library/Meshes";
-std::vector<std::string> directoryContents;
-
 MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta l�nea al principio del constructor
     open(title, width, height);
-
+    
     ImGui::CreateContext();
 
     g_io = &ImGui::GetIO();
@@ -77,20 +79,6 @@ MyWindow::~MyWindow() {
 
 void MyWindow::logMessage(const std::string& message) {
     logMessages.push_back(message);
-}
-
-void MyWindow::UpdateDirectoryContents() {
-   try {
-        directoryContents.clear(); // Limpiar contenido previo
-
-        if (fs::exists(currentDirectory) && fs::is_directory(currentDirectory)) {
-            for (const auto& entry : fs::directory_iterator(currentDirectory)) {
-                directoryContents.push_back(entry.path().string());
-            }
-        }
-    } catch (const fs::filesystem_error& e) {
-        std::cerr << "Error listing directory: " << e.what() << std::endl;
-    }
 }
 
 void MyWindow::open(const char* title, unsigned short width, unsigned short height) {
@@ -168,6 +156,7 @@ void MyWindow::renderToFramebuffer() {
 }
 
 void MyWindow::draw() {
+    Config config(this);
 
     Uint32 currentTime = SDL_GetTicks();
     frameCount++;
@@ -237,135 +226,16 @@ void MyWindow::draw() {
 
     if (isConsolaOn)
     {
-        ImGui::Begin("Consola");
-        for (const auto& msg : logMessages) {
-            ImGui::Text("%s", msg.c_str());
-        }
-        ImGui::End();
+        Consola::draw(logMessages);
     }
 
     if (isConfigOn)
     {
-        ImGui::Begin("Config");
-        ImGui::Text("Configuracion general del sistema");
-		
-        // Sección de resolución de pantalla
-        ImGui::Text("Resolución de pantalla:");
-
-        struct ResolutionItem {
-            ivec2 resolution;
-            std::string name;
-        };
-
-        std::vector<ResolutionItem> resolutions = {
-            { {800, 600}, "800 x 600" },
-            { {1024, 768}, "1024 x 768" },
-            { {1280, 720}, "1280 x 720" },
-            { {1360, 768}, "1360 x 768" },
-            { {1366, 768}, "1366 x 768" },
-            { {1440, 900}, "1440 x 900" },
-            { {1600, 900}, "1600 x 900" },
-            { {1920, 1080}, "1920 x 1080" }
-        };
-
-        static int selectedResolutionIndex = 0;
-        if (ImGui::Combo("Resolucion", &selectedResolutionIndex, [](void* data, int idx, const char** out_text) {
-            const std::vector<ResolutionItem>* resolutions = static_cast<const std::vector<ResolutionItem>*>(data);
-            *out_text = resolutions->at(idx).name.c_str(); // Return resolution name
-            return true;
-            }, (void*)&resolutions, resolutions.size())) {
-            selectedResolution = resolutions[selectedResolutionIndex].resolution;
-
-            // Update window size
-            SDL_SetWindowSize(_window, selectedResolution.x, selectedResolution.y);
-
-            // Ensure we apply the new projection and viewport
-            if (!isFullscreen) {
-                renderer.applyProjectionAndViewport(selectedResolution); // Aplica la resolución seleccionada
-            }
-        }
-
-        // Sección de pantalla completa
-        if (ImGui::Checkbox("Pantalla completa", &isFullscreen)) {
-            if (isFullscreen) {
-                SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                logMessage("Pantalla completa activada.");
-            }
-            else {
-                SDL_SetWindowFullscreen(_window, 0);  // 0 means windowed mode
-                logMessage("Pantalla completa desactivada.");
-            }
-
-            // Get the current window size dynamically after changing fullscreen mode
-            int windowWidth, windowHeight;
-            SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
-
-            // Apply the new window size for projection and viewport
-            renderer.applyProjectionAndViewport(ivec2(windowWidth, windowHeight));
-        }
-
-        ImGui::Text("Grafico FPS");
-        static float values[90] = {};
-        static int values_offset = 0;
-        values[values_offset] = fps; // Ejemplo fijo de FPS
-        values_offset = (values_offset + 1) % 90;
-        char fpsText[16];
-        sprintf_s(fpsText, "%d fps", static_cast<int>(fps));
-        ImGui::PlotLines("FPS", values, IM_ARRAYSIZE(values), values_offset, fpsText, 0.0f, 100.0f, ImVec2(0, 80));
-
-        ImGui::Text("Consumo de Memoria: ");
-        try {
-            MemoryInfo memInfo = MemoryUsage::getMemoryInfo();
-            ImGui::Separator();
-            ImGui::Text("Consumo de Memoria:");
-            ImGui::Text("Memoria Total: %llu MB", memInfo.totalMemory);
-            ImGui::Text("Memoria Libre: %llu MB", memInfo.freeMemory);
-            ImGui::Text("Memoria Usada: %llu MB", memInfo.usedMemory);
-            static float totalMemoryValues[90];
-            static float freeMemoryValues[90];
-            static float usedMemoryValues[90];
-            static int memValuesOffset = 0;
-
-            totalMemoryValues[memValuesOffset] = memInfo.totalMemory;
-            freeMemoryValues[memValuesOffset] = memInfo.freeMemory;
-            usedMemoryValues[memValuesOffset] = memInfo.usedMemory;
-            memValuesOffset = (values_offset + 1) % 90;
-
-            ImGui::PlotLines("TotalMem", totalMemoryValues, IM_ARRAYSIZE(totalMemoryValues), memValuesOffset, "TotalMem", 0.0f, 100.0f, ImVec2(0, 80));
-            ImGui::PlotLines("freeMem", freeMemoryValues, IM_ARRAYSIZE(freeMemoryValues), memValuesOffset, "FreeMem", 0.0f, 100.0f, ImVec2(0, 80));
-            ImGui::PlotLines("UsedMem", usedMemoryValues, IM_ARRAYSIZE(usedMemoryValues), memValuesOffset, "UsedMem", 0.0f, 100.0f, ImVec2(0, 80));
-        }
-        catch (const std::exception& e) {
-            ImGui::Text("Error obteniendo memoria: %s", e.what());
-        }
-        ImGui::Text("Deteccion de maquinaria i versions de programario:");
-        ImGui::Text("SDL, OpenGL, DevIL");
-        ImGui::End();
+        config.draw(_window, renderer, fps);
     }
 
     if (isJerarquiaOn) {
-        // Jerarquía (vacía)
-        ImGui::Begin("Jerarquía");
-        ImGui::Text("Lista de GameObjects:");
-
-        // Recorre todos los objetos en la jerarquía
-        for (size_t i = 0; i < scene.gameObjectNames.size(); ++i) {
-            // Verifica si el objeto está seleccionado (si el índice coincide con el seleccionado)
-            bool isSelected = (scene.selectedGameObjectIndex == i);
-
-            // Dibuja el objeto y permite seleccionarlo
-            if (ImGui::Selectable((scene.gameObjectNames[i] + "###" + std::to_string(i)).c_str(), isSelected)) {
-                // Si el objeto seleccionado es diferente al actual, actualiza la selección
-                if (scene.selectedGameObjectIndex != i) {
-                    // Cambia el índice del objeto seleccionado
-                    scene.selectedGameObjectIndex = i;
-
-                    // No cambiamos la cámara aún, solo actualizamos el índice seleccionado
-                    logMessage("Objeto seleccionado.");
-                }
-            }
-        }
-        ImGui::End();
+        Jerarquia::draw();
     }
 
     // Si el usuario pulsa 'F', movemos la cámara al objeto seleccionado
@@ -379,117 +249,12 @@ void MyWindow::draw() {
 
     if (isSceneOn) {
         renderToFramebuffer();  // Renderiza la escena al framebuffer
-        ImGui::Begin("Scene");
-        if (textureColorbuffer) {
-            ImGui::Image((void*)(intptr_t)textureColorbuffer, ImVec2(renderer._WINDOW_SIZE.x, renderer._WINDOW_SIZE.y));
-        }
-        ImGui::End();
+        Escena::draw(textureColorbuffer);
     }
 
     if (isInspectorOn)
     {
-
-        // Inspector (vacio)
-        ImGui::Begin("Inspector");
-
-        if (scene.selectedGameObjectIndex >= 0 && scene.selectedGameObjectIndex < scene.gameObjects.size()) {
-            GameObject* selectedObject = scene.gameObjects[scene.selectedGameObjectIndex];
-
-            ImGui::Text("Texture");
-            // Guardar la textura original solo si aún no lo hemos hecho
-            static TextureData* originalTexture = selectedObject->texture;
-
-            if (ImGui::Button("Off")) {
-                if (!chekerOn)
-                {
-                    selectedObject->setTexture(new TextureData(scene.checkerTextureID));   // Asignar textura checker
-                }
-                chekerOn = !chekerOn;  // Cambiar estado de checker
-            }
-			ImGui::SameLine();
-			if (ImGui::Button("On")) {
-				if (chekerOn)
-				{
-					selectedObject->setTexture(originalTexture);  // Restaurar la textura original
-				}
-                chekerOn = !chekerOn;  // Cambiar estado de checker
-			}
-
-            // Mostrar y modificar la posicion
-            float position[3] = { selectedObject->transform.position.x, selectedObject->transform.position.y, selectedObject->transform.position.z };
-            if (ImGui::InputFloat3("Posicion", position)) {
-                selectedObject->transform.position = { position[0], position[1], position[2] };
-            }
-
-            // Mostrar y modificar la rotacion
-            float rotation[3] = { selectedObject->transform.rotation.x, selectedObject->transform.rotation.y, selectedObject->transform.rotation.z };
-            if (ImGui::InputFloat3("Rotacion", rotation)) {
-                selectedObject->transform.rotation = { rotation[0], rotation[1], rotation[2] };
-            }
-
-            // Mostrar y modificar la escala
-            float scale[3] = { selectedObject->transform.scale.x, selectedObject->transform.scale.y, selectedObject->transform.scale.z };
-            if (ImGui::InputFloat3("Escala", scale)) {
-                selectedObject->transform.scale = { scale[0], scale[1], scale[2] };
-            }
-
-            // Mostrar el Texture ID (si existe)
-            if (selectedObject->getTexture()) {
-                GLuint textureID = selectedObject->getTexture()->getTextureID();
-                ImGui::Text("Texture ID: %u", textureID);
-            }
-            else {
-                ImGui::Text("Texture ID: None");
-            }
-
-            if (selectedObject->texture->getHeight() && selectedObject->texture->getWidth())
-            {
-				GLuint GetHeight = selectedObject->texture->getHeight();
-				GLuint GetWidth = selectedObject->texture->getWidth();
-                ImGui::Text("Texture Shape: %u x %u", GetHeight, GetWidth);
-            }
-            else
-            {
-				ImGui::Text("Texture Shape: None");
-            }
-            ImGui::Text("Texture path: %s", selectedObject->texture->getPath().c_str());
-            // Mostrar la informacion de la malla
-            if (selectedObject->getMesh()) {
-                const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
-                const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
-                const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
-
-                ImGui::Text("Informacion de la Malla:");
-                ImGui::Text("Vertices: %zu", vertices.size());
-                ImGui::Text("UVs: %zu", uvs.size());
-                ImGui::Text("Indices: %zu", indices.size());
-
-                // Mostrar una vista previa opcional
-                ImGui::Separator();
-                ImGui::Text("Vista previa de vertices:");
-                for (size_t i = 0; i < std::min<size_t>(vertices.size(), 9); i += 3) {
-                    ImGui::Text("(%f, %f, %f)", vertices[i], vertices[i + 1], vertices[i + 2]);
-                }
-
-                ImGui::Text("Vista previa de UVs:");
-                for (size_t i = 0; i < std::min<size_t>(uvs.size(), 6); i += 2) {
-                    ImGui::Text("(%f, %f)", uvs[i], uvs[i + 1]);
-                }
-
-                ImGui::Text("Vista previa de indices:");
-                for (size_t i = 0; i < std::min<size_t>(indices.size(), 9); i += 3) {
-                    ImGui::Text("(%u, %u, %u)", indices[i], indices[i + 1], indices[i + 2]);
-                }
-            }
-            else {
-                ImGui::Text("Malla: Ninguna");
-            }
-        }
-        else {
-            ImGui::Text("Seleccione un GameObject de la jerarquia para ver sus propiedades.");
-        }
-
-        ImGui::End();
+        inspector.draw();
     }
 
 
@@ -501,58 +266,7 @@ void MyWindow::draw() {
         ImGui::EndPopup();
     }
 
-    ImGui::Begin("File Explorer");
-
-    // Mostrar directorio actual
-    ImGui::Text("Current Directory: %s", currentDirectory.c_str());
-
-    // Botón para navegar al directorio padre
-    if (ImGui::Button(".. (Go Up)")) {
-        try {
-            fs::path parent = fs::path(currentDirectory).parent_path();
-            if (fs::exists(parent)) {
-                currentDirectory = parent.string();
-                UpdateDirectoryContents();
-            }
-            else {
-                ImGui::Text("Error: Parent directory does not exist.");
-            }
-        }
-        catch (const fs::filesystem_error& e) {
-            ImGui::Text("Error accessing parent directory: %s", e.what());
-        }
-    }
-
-    // Listar contenido del directorio
-    for (const auto& entryPath : directoryContents) {
-        try {
-            fs::path entry(entryPath); // Convertir a fs::path
-
-            // Si es un directorio, mostrarlo como botón
-            if (fs::is_directory(entry)) {
-                if (ImGui::Button(FileSystemUtils::getFileName(entry.string()).c_str())) {
-                    currentDirectory = entry.string();
-                    UpdateDirectoryContents();
-                }
-            }
-            // Si es un archivo, permitir interacción
-            else {
-                ImGui::Text("%s", FileSystemUtils::getFileName(entry.string()).c_str());
-
-                // Permitir arrastrar archivos hacia la escena
-                if (ImGui::IsItemClicked()) {
-                    handleFileDrop(entry.string().c_str());
-                }
-            }
-        }
-        catch (const fs::filesystem_error& e) {
-            ImGui::Text("Error: %s", e.what()); // Mostrar errores específicos por entrada
-        }
-    }
-
-    ImGui::End();
-
-
+    explorer.draw();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
