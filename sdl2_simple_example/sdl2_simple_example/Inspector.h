@@ -12,6 +12,8 @@ public:
 	void draw();
 private:
 	bool chekerOn = false;
+	bool saved = false;
+
 };
 
 #endif // INSPECTOR_H

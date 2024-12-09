@@ -45,7 +45,7 @@ void Scene::setCheckerTexture(GLuint checkerTextureID) {
 void Scene::drawScene() {
     for (auto* obj : gameObjects) {
         if (obj->getTexture() == nullptr) {
-            if (checkerTextureID != 0) {
+            if (checkerTextureID != 2) {
                 TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
                 obj->setTexture(checkerTexture);
             }

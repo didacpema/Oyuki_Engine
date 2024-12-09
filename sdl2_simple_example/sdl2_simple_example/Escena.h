@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include "MyWindow.h"
 
+
 class Escena {
 public:
 	Escena();

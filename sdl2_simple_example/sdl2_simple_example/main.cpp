@@ -45,9 +45,9 @@ void handleFileDrop(const char* filePath) {
             scene.loadModelData(importer.getVertices(), importer.getUVs(), importer.getIndices(), fileName);
 
             // Configurar textura checker si no está asignada
-            if (scene.checkerTextureID == 0) {
-                scene.checkerTextureID = importer.GenerateCheckerTexture();
-            }
+
+            scene.checkerTextureID = importer.GenerateCheckerTexture();
+            
             scene.setCheckerTexture(scene.checkerTextureID);
         }
     }

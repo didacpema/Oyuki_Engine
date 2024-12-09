@@ -5,6 +5,7 @@ extern Scene scene;
 Inspector::Inspector() {}
 Inspector::~Inspector(){}
 
+static TextureData* originalTexture;
 void Inspector::draw() {
 
 
@@ -16,7 +17,10 @@ void Inspector::draw() {
 
         ImGui::Text("Texture");
         // Guardar la textura original solo si aún no lo hemos hecho
-        static TextureData* originalTexture = selectedObject->texture;
+        if (selectedObject->texture->id != 2)
+        {
+            originalTexture = selectedObject->texture;
+        }
 
         if (ImGui::Button("Off")) {
             if (!chekerOn)

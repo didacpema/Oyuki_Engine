@@ -23,5 +23,5 @@ public:
     // Índice del objeto seleccionado (-1 si no hay ninguno)
     int selectedGameObjectIndex = -1;
     float angle = 3.14159265359f;
-	GLuint checkerTextureID = 0;
+	GLuint checkerTextureID;
 };
