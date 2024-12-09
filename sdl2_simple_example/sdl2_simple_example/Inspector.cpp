@@ -26,16 +26,16 @@ void Inspector::draw() {
             if (!chekerOn)
             {
                 selectedObject->setTexture(new TextureData(scene.checkerTextureID));   // Asignar textura checker
+                chekerOn = !chekerOn;  // Cambiar estado de checker
             }
-            chekerOn = !chekerOn;  // Cambiar estado de checker
         }
         ImGui::SameLine();
         if (ImGui::Button("On")) {
             if (chekerOn)
             {
                 selectedObject->setTexture(originalTexture);  // Restaurar la textura original
+                chekerOn = !chekerOn;  // Cambiar estado de checker
             }
-            chekerOn = !chekerOn;  // Cambiar estado de checker
         }
 
         // Mostrar y modificar la posicion
