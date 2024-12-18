@@ -4,7 +4,6 @@
 
 #include <imgui.h>
 #include "MyWindow.h"
-#include "GameObject.h"
 
 class Jerarquia {
 public:
@@ -13,9 +12,6 @@ public:
 	static void draw();
 
 private:
-	// Método auxiliar para dibujar un objeto y manejar la jerarquía
-	static void drawGameObject(GameObject* gameObject, size_t index);
-
 };
 
 #endif // JERARQUIA_H
