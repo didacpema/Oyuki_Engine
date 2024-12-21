@@ -8,12 +8,39 @@ extern Importer importer;
 Scene::Scene() {}
 
 Scene::~Scene() {
-    for (GameObject* obj : gameObjects) {
-        delete obj;
+    // Solo eliminamos los objetos raíz, ya que eliminarán recursivamente a sus hijos
+    for (auto it = gameObjects.begin(); it != gameObjects.end();) {
+        GameObject* obj = *it;
+        if (!obj->getParent()) {
+            deleteGameObjectHierarchy(obj);
+            it = gameObjects.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
     gameObjects.clear();
+    gameObjectNames.clear();
 }
+void Scene::deleteGameObjectHierarchy(GameObject* obj) {
+    if (!obj) return;
 
+    // Primero eliminamos los hijos recursivamente
+    auto children = obj->getChildren(); // Hacemos una copia porque se modificará durante la eliminación
+    for (auto* child : children) {
+        deleteGameObjectHierarchy(child);
+    }
+
+    // Eliminamos este objeto de la lista de gameObjects y gameObjectNames
+    auto it = std::find(gameObjects.begin(), gameObjects.end(), obj);
+    if (it != gameObjects.end()) {
+        int index = std::distance(gameObjects.begin(), it);
+        gameObjects.erase(it);
+        gameObjectNames.erase(gameObjectNames.begin() + index);
+    }
+
+    delete obj;
+}
 void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<unsigned int>& indices, const std::string& name,  const Transform& transform) {
     Mesh* mesh = new Mesh(vertices, uvs, indices);
     GameObject* gameObject = new GameObject(mesh, nullptr);
@@ -42,17 +69,51 @@ void Scene::setCheckerTexture(GLuint checkerTextureID) {
     setTexture(checkerTexture);
 }
 
+bool Scene::setParentChild(int childIndex, int parentIndex) {
+    if (!isValidParenting(childIndex, parentIndex)) {
+        return false;
+    }
+
+    GameObject* child = gameObjects[childIndex];
+    GameObject* newParent = gameObjects[parentIndex];
+
+    child->setParent(newParent);
+    return true;
+}
+void Scene::removeFromParent(int childIndex) {
+    if (childIndex >= 0 && childIndex < gameObjects.size()) {
+        GameObject* child = gameObjects[childIndex];
+        if (child->getParent()) {
+            child->setParent(nullptr);
+        }
+    }
+}
+bool Scene::isValidParenting(int childIndex, int parentIndex) const {
+    if (childIndex < 0 || childIndex >= gameObjects.size() ||
+        parentIndex < 0 || parentIndex >= gameObjects.size() ||
+        childIndex == parentIndex) {
+        return false;
+    }
+
+    GameObject* child = gameObjects[childIndex];
+    GameObject* parent = gameObjects[parentIndex];
+
+    // Verificar que el padre no sea hijo del hijo (evitar ciclos)
+    return !parent->isChildOf(child);
+}
 void Scene::drawScene() {
+    // Solo dibujamos los objetos raíz, ellos dibujarán a sus hijos
     for (auto* obj : gameObjects) {
-        if (obj->getTexture() == nullptr) {
-            if (checkerTextureID != 2) {
+        if (!obj->getParent()) {  // Si no tiene padre, es un objeto raíz
+            if (obj->getTexture() == nullptr && checkerTextureID != 2) {
                 TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
                 obj->setTexture(checkerTexture);
             }
+            obj->draw();
         }
-        obj->draw();
     }
 }
+
 void Scene::createCube(const char* filePath) {
     
     std::string fileName = "Cube";

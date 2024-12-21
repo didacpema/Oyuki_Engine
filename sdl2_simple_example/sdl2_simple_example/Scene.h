@@ -17,6 +17,11 @@ public:
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
     
+    // Nuevos métodos para manejar la jerarquía
+    bool setParentChild(int childIndex, int parentIndex);
+    void removeFromParent(int childIndex);
+    bool isValidParenting(int childIndex, int parentIndex) const;
+
     std::vector<GameObject*> gameObjects;
     std::vector<std::string> gameObjectNames;
 
@@ -24,4 +29,7 @@ public:
     int selectedGameObjectIndex = -1;
     float angle = 3.14159265359f;
 	GLuint checkerTextureID;
+
+    void deleteGameObjectHierarchy(GameObject* obj);
+
 };
