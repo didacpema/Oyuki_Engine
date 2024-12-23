@@ -22,6 +22,9 @@ void Scene::loadModelData(const std::vector<float>& vertices, const std::vector<
 
     gameObjects.push_back(gameObject);
     gameObjectNames.push_back(name);
+    
+    gameObject->updateAABB();
+    updateQuadtree();
 }
 
 void Scene::setTexture(TextureData* newTexture) {
@@ -52,6 +55,27 @@ void Scene::drawScene() {
         }
         obj->draw();
     }
+    drawQuadtree();
+  
+}
+void Scene::updateQuadtree() {
+    
+    AABB sceneBounds(glm::vec3(-10, -10, -10), glm::vec3(10, 10, 10));
+    if (quadtree) delete quadtree;
+    quadtree = new QuadtreeNode(sceneBounds);
+
+    for (auto obj : gameObjects) {
+        quadtree->insert(obj);
+    }
+
+}
+void Scene::drawQuadtree() const {
+    if (quadtree) quadtree->debugDraw();
+}
+
+std::vector<GameObject*> Scene::getNearbyObjects(const AABB& range) {
+    if (quadtree) return quadtree->queryRange(range);
+    return std::vector<GameObject*>();
 }
 void Scene::createCube(const char* filePath) {
     

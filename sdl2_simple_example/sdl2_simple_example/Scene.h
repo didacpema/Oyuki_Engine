@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include <glm/glm.hpp>
 #include <cmath>
+#include "QuadtreeNode.h"
 
 
 class Scene {
@@ -16,7 +17,10 @@ public:
     void setTexture(TextureData* newTexture);
     void setCheckerTexture(GLuint checkerTextureID);
     void drawScene();
-    
+    void updateQuadtree();
+    void drawQuadtree() const;
+    std::vector<GameObject*> getNearbyObjects(const AABB& range);
+
     std::vector<GameObject*> gameObjects;
     std::vector<std::string> gameObjectNames;
 
@@ -24,4 +28,6 @@ public:
     int selectedGameObjectIndex = -1;
     float angle = 3.14159265359f;
 	GLuint checkerTextureID;
+    QuadtreeNode* quadtree;
+    
 };
