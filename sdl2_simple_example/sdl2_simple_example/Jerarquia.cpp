@@ -72,17 +72,9 @@ void Jerarquia::draw() {
     ImGui::Begin("Jerarquía");
     ImGui::Text("Lista de GameObjects:");
 
-    // Área para detectar drops en el espacio vacío
-    ImGui::BeginChild("GameObjectList", ImVec2(0, 0), true);
-    // Permitir que se suelte un objeto en el área vacía de la ventana (para remover padre)
-    if (ImGui::BeginDragDropTarget()) {
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DND")) {
-            int droppedIndex = *(const int*)payload->Data;
-            scene.removeFromParent(droppedIndex);
-        }
-        ImGui::EndDragDropTarget();
-    }
-    // Dibujar solo los objetos que no tienen padre (objetos raíz)
+    ImGui::BeginChild("GameObjectList", ImVec2(0, -30), true); // Reduced height to make room for drop zone
+
+    // Dibujar objetos raíz
     for (size_t i = 0; i < scene.gameObjects.size(); ++i) {
         GameObject* obj = scene.gameObjects[i];
         if (!obj->getParent()) {
@@ -90,5 +82,22 @@ void Jerarquia::draw() {
         }
     }
     ImGui::EndChild();
+
+    // Drop zone area
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+    ImGui::BeginChild("DropZone", ImVec2(0, 25), true);
+    ImGui::Text("Desvincular padre");
+
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DND")) {
+            int droppedIndex = *(const int*)payload->Data;
+            scene.removeFromParent(droppedIndex);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
+
     ImGui::End();
 }

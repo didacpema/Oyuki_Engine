@@ -83,8 +83,10 @@ bool Scene::setParentChild(int childIndex, int parentIndex) {
 void Scene::removeFromParent(int childIndex) {
     if (childIndex >= 0 && childIndex < gameObjects.size()) {
         GameObject* child = gameObjects[childIndex];
-        if (child->getParent()) {
-            child->setParent(nullptr);
+        GameObject* parent = child->getParent();
+        if (parent) {
+            parent->removeChild(child);  
+            child->setParent(nullptr);  
         }
     }
 }

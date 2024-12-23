@@ -72,18 +72,47 @@ void GameObject::removeChild(GameObject* child) {
 }
 
 Transform GameObject::getGlobalTransform() const {
-    Transform globalTransform = transform;
+    glm::mat4 localMatrix = glm::mat4(1.0f);
+    localMatrix = glm::translate(localMatrix, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
+    localMatrix = glm::rotate(localMatrix, glm::radians(transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    localMatrix = glm::rotate(localMatrix, glm::radians(transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    localMatrix = glm::rotate(localMatrix, glm::radians(transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    localMatrix = glm::scale(localMatrix, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
 
+    // Multiply with parent's matrix if exists
     if (parent) {
+        glm::mat4 parentMatrix = glm::mat4(1.0f);
         Transform parentTransform = parent->getGlobalTransform();
+        parentMatrix = glm::translate(parentMatrix, glm::vec3(parentTransform.position.x, parentTransform.position.y, parentTransform.position.z));
+        parentMatrix = glm::rotate(parentMatrix, glm::radians(parentTransform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        parentMatrix = glm::rotate(parentMatrix, glm::radians(parentTransform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        parentMatrix = glm::rotate(parentMatrix, glm::radians(parentTransform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        parentMatrix = glm::scale(parentMatrix, glm::vec3(parentTransform.scale.x, parentTransform.scale.y, parentTransform.scale.z));
 
-        // Aplicar transformaciones del padre
-        globalTransform.position = parentTransform.position + transform.position;
-        globalTransform.rotation = parentTransform.rotation + transform.rotation;
-        globalTransform.scale.x *= parentTransform.scale.x;
-        globalTransform.scale.y *= parentTransform.scale.y;
-        globalTransform.scale.z *= parentTransform.scale.z;
+        localMatrix = parentMatrix * localMatrix;
     }
+
+    Transform globalTransform;
+
+    // Extract position
+    glm::vec3 position = glm::vec3(localMatrix[3]);
+    globalTransform.position.x = position.x;
+    globalTransform.position.y = position.y;
+    globalTransform.position.z = position.z;
+
+    // Extract rotation
+    glm::vec3 rotation;
+    rotation.x = glm::degrees(atan2(localMatrix[1][2], localMatrix[2][2]));
+    rotation.y = glm::degrees(asin(-localMatrix[0][2]));
+    rotation.z = glm::degrees(atan2(localMatrix[0][1], localMatrix[0][0]));
+    globalTransform.rotation.x = rotation.x;
+    globalTransform.rotation.y = rotation.y;
+    globalTransform.rotation.z = rotation.z;
+
+    // Extract scale
+    globalTransform.scale.x = glm::length(glm::vec3(localMatrix[0]));
+    globalTransform.scale.y = glm::length(glm::vec3(localMatrix[1]));
+    globalTransform.scale.z = glm::length(glm::vec3(localMatrix[2]));
 
     return globalTransform;
 }
