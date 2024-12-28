@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include <glm/glm.hpp>
 #include <cmath>
+#include "Renderer.h"
 
 
 class Scene {
@@ -29,6 +30,8 @@ public:
     int selectedGameObjectIndex = -1;
     float angle = 3.14159265359f;
 	GLuint checkerTextureID;
+
+    Renderer renderer;
 
     void deleteGameObjectHierarchy(GameObject* obj);
 

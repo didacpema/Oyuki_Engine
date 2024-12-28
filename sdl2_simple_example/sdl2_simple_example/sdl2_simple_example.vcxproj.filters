@@ -113,5 +113,11 @@
     <ClInclude Include="FileExplorer.h">
       <Filter>Windows</Filter>
     </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

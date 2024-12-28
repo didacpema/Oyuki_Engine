@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <GL/glew.h>
-
+#include "AABB.h"
 class Mesh {
 public:
     std::vector<float> vertices;
@@ -19,4 +19,10 @@ public:
     const std::vector<float>& getVertices() const { return vertices; }
     const std::vector<float>& getUVs() const { return uvs; }
     const std::vector<unsigned int>& getIndices() const { return indices; }
+
+    AABB boundingBox;
+
+    void calculateBoundingBox() {
+        boundingBox.updateFromVertices(vertices);
+    }
 };

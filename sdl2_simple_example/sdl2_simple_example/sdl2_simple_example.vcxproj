@@ -144,12 +144,14 @@
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CustomFormatUtils.h" />
     <ClInclude Include="Consola.h" />
     <ClInclude Include="Escena.h" />
     <ClInclude Include="FileExplorer.h" />
     <ClInclude Include="FilesystemUtils.h" />
+    <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Inspector.h" />

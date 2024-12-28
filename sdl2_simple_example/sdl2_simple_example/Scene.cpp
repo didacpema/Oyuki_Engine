@@ -104,14 +104,25 @@ bool Scene::isValidParenting(int childIndex, int parentIndex) const {
     return !parent->isChildOf(child);
 }
 void Scene::drawScene() {
-    // Solo dibujamos los objetos raíz, ellos dibujarán a sus hijos
+    renderer.updateFrustum();
+
     for (auto* obj : gameObjects) {
-        if (!obj->getParent()) {  // Si no tiene padre, es un objeto raíz
-            if (obj->getTexture() == nullptr && checkerTextureID != 2) {
-                TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
-                obj->setTexture(checkerTexture);
+        if (!obj->getParent()) {
+            // Check frustum culling
+            obj->isVisible = renderer.frustum.isBoxVisible(obj->getTransformedBoundingBox());
+
+            if (obj->isVisible) {
+                if (obj->getTexture() == nullptr && checkerTextureID != 2) {
+                    TextureData* checkerTexture = new TextureData(checkerTextureID, "checker_texture_path", 0, 0);
+                    obj->setTexture(checkerTexture);
+                }
+                obj->draw();
+
+                // Draw bounding box if debug visualization is enabled
+                if (renderer.showBoundingBoxes) {
+                    obj->drawBoundingBox();
+                }
             }
-            obj->draw();
         }
     }
 }
