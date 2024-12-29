@@ -26,7 +26,7 @@ float y = Renderer::eyeY;
 float z = Renderer::eyeZ;
 bool chekerOn = false;
 
-MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()) {
+MyWindow::MyWindow(const char* title, unsigned short width, unsigned short height) : fps(0.0f), frameCount(0), lastTime(SDL_GetTicks()), _explorer(nullptr) {
     SDL_Init(SDL_INIT_VIDEO);  // Mueve esta l�nea al principio del constructor
     open(title, width, height);
     
@@ -59,6 +59,7 @@ MyWindow::MyWindow(const char* title, unsigned short width, unsigned short heigh
     colors[ImGuiCol_HeaderActive] = ImVec4(0.3f, 0.15f, 0.35f, 1.0f);      // Cabecera de listas desplegables activas
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    SDL_SetWindowData(_window, "WindowInstance", this);
 }
 
 MyWindow::~MyWindow() {
@@ -299,9 +300,15 @@ bool MyWindow::processEvents(IEventProcessor* event_processor) {
         {
         case SDL_DROPFILE: {
             char* droppedFile = e.drop.file;
-            logMessage("Archivo arrastrado: " + string(droppedFile));
-            handleFileDrop(droppedFile); // Tu función para manejar archivos
-            SDL_free(droppedFile);
+            if (droppedFile && _explorer) {
+                std::vector<std::string> droppedPaths;
+                droppedPaths.push_back(droppedFile);
+
+                _explorer->handleFileDrop(droppedPaths);
+
+                logMessage("Archivo arrastrado: " + std::string(droppedFile));
+                SDL_free(droppedFile);
+            }
             break;
         }
         case SDL_QUIT:

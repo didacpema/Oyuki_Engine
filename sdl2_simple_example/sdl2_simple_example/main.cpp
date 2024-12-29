@@ -63,50 +63,56 @@ void handleFileDrop(const char* filePath) {
 }
 
 int main(int argc, char** argv) {
+    try {
+        FileSystemUtils::GenerateRequiredDirectories();
+        MyWindow window("Tu Título", 800, 600);
+        window.setExplorer(&explorer);
+        explorer.UpdateDirectoryContents(); // Cargar contenido inicial
+        importer.setWindow(&myWindow);
 
-    FileSystemUtils::GenerateRequiredDirectories();
-    
-    explorer.UpdateDirectoryContents(); // Cargar contenido inicial
-    importer.setWindow(&myWindow);
+        myWindow.logMessage("Initializing SDL...");
+        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+            myWindow.logMessage("Error initializing SDL: " + std::string(SDL_GetError()));
+            return -1;
+        }
+        myWindow.logMessage("SDL initialized successfully.");
 
-    myWindow.logMessage("Initializing SDL...");
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        myWindow.logMessage("Error initializing SDL: " + std::string(SDL_GetError()));
+        myWindow.logMessage("Initializing DevIL...");
+        ilInit();
+        iluInit();
+        ilutRenderer(ILUT_OPENGL);
+        myWindow.logMessage("DevIL initialized successfully.");
+
+        myWindow.logMessage("Initializing OpenGL context...");
+        Renderer::initOpenGL(WINDOW_SIZE);
+        Renderer::setupProjection(45.0f, 1.0f, 0.1f, 1000.0f);
+        myWindow.logMessage("OpenGL context initialized.");
+        myWindow.setupFramebuffer();
+        myWindow.renderToFramebuffer();
+
+        SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
+        handleFileDrop("Library/Meshes/BakerHouse.fbx");
+        handleFileDrop("Library/Textures/Baker_house.png");
+
+        while (myWindow.processEvents() && myWindow.isOpen()) {
+            auto start = hrclock::now();
+
+
+
+            myWindow.draw();
+            myWindow.swapBuffers();
+
+            auto elapsed = hrclock::now() - start;
+            std::this_thread::sleep_for(FRAME_DT - elapsed);
+        }
+
+        SDL_Quit();
+        myWindow.logMessage("Application terminated.");
+        return 0;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return -1;
     }
-    myWindow.logMessage("SDL initialized successfully.");
-
-    myWindow.logMessage("Initializing DevIL...");
-    ilInit();
-    iluInit();
-    ilutRenderer(ILUT_OPENGL);
-    myWindow.logMessage("DevIL initialized successfully.");
-
-    myWindow.logMessage("Initializing OpenGL context...");
-    Renderer::initOpenGL(WINDOW_SIZE);
-    Renderer::setupProjection(45.0f, 1.0f, 0.1f, 1000.0f);
-    myWindow.logMessage("OpenGL context initialized.");
-    myWindow.setupFramebuffer();
-    myWindow.renderToFramebuffer();
-
-    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-
-    handleFileDrop("Library/Meshes/BakerHouse.fbx");
-    handleFileDrop("Library/Textures/Baker_house.png");
-
-    while (myWindow.processEvents() && myWindow.isOpen()) {
-        auto start = hrclock::now();
-        
-        
-
-        myWindow.draw();
-        myWindow.swapBuffers();
-
-        auto elapsed = hrclock::now() - start;
-        std::this_thread::sleep_for(FRAME_DT - elapsed);
-    }
-
-    SDL_Quit();
-    myWindow.logMessage("Application terminated.");
-    return 0;
 }

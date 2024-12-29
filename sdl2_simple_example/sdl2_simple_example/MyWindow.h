@@ -3,17 +3,17 @@
 
 #include "Renderer.h"
 #include "Scene.h"
+#include "FileExplorer.h"
 
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_opengl.h>
-
-
-
 #include <string>
 #include <vector>
+
+class Explorer;
 
 class IEventProcessor {
 public:
@@ -72,6 +72,12 @@ public:
     std::vector<std::string> logMessages;         // Vector de mensajes de LOG
 
     GLuint framebuffer, textureColorbuffer, rbo;
+
+    
+    Explorer* _explorer; // Nuevo miembro privado
+
+    void setExplorer(Explorer* explorer) { _explorer = explorer; }
+    Explorer* getExplorer() const { return _explorer; }
 };
 
 extern void handleFileDrop(const char* filePath);

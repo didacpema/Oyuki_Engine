@@ -1,8 +1,29 @@
 #include "FileExplorer.h"
+#include "DropHandler.h"
+#include <GLFW/glfw3.h>
+#include <filesystem>
 
-Explorer::Explorer(){}
-Explorer::~Explorer(){}
+Explorer::Explorer() {
+    if (!fs::exists(currentDirectory)) {
+        fs::create_directories(currentDirectory);
+    }
+}
 
+Explorer::~Explorer() {
+    // Destructor limpio, sin implementación incorrecta
+}
+
+void Explorer::handleFileDrop(const std::vector<std::string>& paths) {
+    for (const auto& path : paths) {
+        try {
+            DropHandler::HandleDroppedFile(path, currentDirectory);
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error handling dropped file: " << e.what() << std::endl;
+        }
+    }
+    UpdateDirectoryContents();
+}
 
 void Explorer::UpdateDirectoryContents() {
     try {
@@ -23,6 +44,7 @@ void Explorer::UpdateDirectoryContents() {
         selectedFileIndex = -1;
     }
 }
+
 void Explorer::deleteSelectedFile() {
     if (selectedFileIndex < 0 || selectedFileIndex >= directoryContents.size()) {
         return;
@@ -41,6 +63,7 @@ void Explorer::deleteSelectedFile() {
         std::cerr << "Error deleting file: " << e.what() << std::endl;
     }
 }
+
 void Explorer::draw() {
     ImGui::Begin("File Explorer");
 
@@ -53,7 +76,7 @@ void Explorer::draw() {
             fs::path parent = fs::path(currentDirectory).parent_path();
             if (fs::exists(parent)) {
                 currentDirectory = parent.string();
-                selectedFileIndex = -1;  // Reset selection when changing directory
+                selectedFileIndex = -1;
                 UpdateDirectoryContents();
             }
         }
@@ -62,18 +85,30 @@ void Explorer::draw() {
         }
     }
 
-    // Lista de archivos y directorios
+    // Área de drop
     ImGui::BeginChild("Files", ImVec2(0, -30), true);
+
+    // Manejar drag & drop
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EXTERNAL_FILE")) {
+            std::vector<std::string> droppedPaths;
+            const char* paths = static_cast<const char*>(payload->Data);
+            droppedPaths.push_back(paths);
+            handleFileDrop(droppedPaths);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // Lista de archivos y directorios
     for (size_t i = 0; i < directoryContents.size(); ++i) {
         try {
             fs::path entry(directoryContents[i]);
-            if (!fs::exists(entry)) continue;  // Skip if file no longer exists
+            if (!fs::exists(entry)) continue;
 
             std::string displayName = FileSystemUtils::getFileName(entry.string());
             bool isSelected = (i == selectedFileIndex);
 
             if (fs::is_directory(entry)) {
-                // Directorios como botones
                 if (ImGui::Button(displayName.c_str())) {
                     currentDirectory = entry.string();
                     selectedFileIndex = -1;
@@ -81,15 +116,13 @@ void Explorer::draw() {
                 }
             }
             else {
-                // Archivos como seleccionables
                 if (ImGui::Selectable(displayName.c_str(), isSelected)) {
                     selectedFileIndex = i;
                 }
 
-                // Drag & Drop solo para archivos
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                    const char* filePath = entry.string().c_str();
-                    ImGui::SetDragDropPayload("FILE_PATH", filePath, strlen(filePath) + 1);
+                    ImGui::SetDragDropPayload("FILE_PATH", entry.string().c_str(),
+                        entry.string().length() + 1);
                     ImGui::Text("Dragging: %s", displayName.c_str());
                     ImGui::EndDragDropSource();
                 }
@@ -108,4 +141,3 @@ void Explorer::draw() {
 
     ImGui::End();
 }
-

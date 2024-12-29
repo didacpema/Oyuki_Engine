@@ -60,6 +60,9 @@
     <ClCompile Include="FileExplorer.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
+    <ClCompile Include="DropHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyWindow.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="FileExplorer.h">
       <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="DropHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

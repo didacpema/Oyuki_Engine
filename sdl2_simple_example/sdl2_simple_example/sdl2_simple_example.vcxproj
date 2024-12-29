@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Consola.cpp" />
+    <ClCompile Include="DropHandler.cpp" />
     <ClCompile Include="Escena.cpp" />
     <ClCompile Include="FileExplorer.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="CustomFormatUtils.h" />
     <ClInclude Include="Consola.h" />
+    <ClInclude Include="DropHandler.h" />
     <ClInclude Include="Escena.h" />
     <ClInclude Include="FileExplorer.h" />
     <ClInclude Include="FilesystemUtils.h" />

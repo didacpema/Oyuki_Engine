@@ -16,7 +16,7 @@ public:
 
 	void draw();
 	void UpdateDirectoryContents();
-	
+	void handleFileDrop(const std::vector<std::string>& paths);
 
 	int getSelectedFileIndex() const { return selectedFileIndex; }
 	std::string getSelectedFilePath() const {
