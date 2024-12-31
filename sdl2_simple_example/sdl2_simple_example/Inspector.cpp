@@ -75,9 +75,9 @@ void Inspector::draw() {
 
         // Mesh information
         if (Mesh* mesh = selectedObject->getMesh()) {
-            const std::vector<float>& vertices = mesh->getVertices();
-            const std::vector<float>& uvs = mesh->getUVs();
-            const std::vector<unsigned int>& indices = mesh->getIndices();
+            const std::vector<float>& vertices = selectedObject->getMesh()->getVertices();
+            const std::vector<float>& uvs = selectedObject->getMesh()->getUVs();
+            const std::vector<unsigned int>& indices = selectedObject->getMesh()->getIndices();
 
             ImGui::Text("Informacion de la Malla:");
             ImGui::Text("Vertices: %zu", vertices.size());
