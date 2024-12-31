@@ -51,7 +51,7 @@ void handleFileDrop(const char* filePath) {
             scene.setCheckerTexture(scene.checkerTextureID);
         }
     }
-    else if (extension == "png" || extension == "jpg") {
+    else if (extension == "png" || extension == "jpg" || extension == "tga") {
         TextureData* texture = importer.loadTexture(filePath);
         if (texture != nullptr) {
             scene.setTexture(texture);
@@ -91,8 +91,14 @@ int main(int argc, char** argv) {
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-    handleFileDrop("Library/Meshes/BakerHouse.fbx");
-    handleFileDrop("Library/Textures/Baker_house.png");
+    handleFileDrop("Library/Meshes/Street.fbx");
+    handleFileDrop("Library/Textures/building_06_c.tga");
+    handleFileDrop("Library/Textures/building_016_c.tga");
+    handleFileDrop("Library/Textures/building_025_c.tga");
+    handleFileDrop("Library/Textures/building01_c.tga");
+    handleFileDrop("Library/Textures/building03_c.tga");
+    handleFileDrop("Library/Textures/building05_c.tga");
+
 
     while (myWindow.processEvents() && myWindow.isOpen()) {
         auto start = hrclock::now();
